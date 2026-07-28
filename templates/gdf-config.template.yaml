@@ -1,0 +1,93 @@
+# GDF Project Config — MANDATORY intake (GDF-006)
+# Copy to the project repo root as `gdf-config.yaml`. The PM agent asks the owner for every
+# <FILL> value at intake; NO work starts until `scripts/gdf-check.sh` passes on this file.
+#
+# ⚠️ RULE: NO secret VALUES in this file, ever — only the NAMES of CI secrets that must exist.
+#    gdf-check greps this file for secret patterns and FAILS on hit.
+
+project:
+  name: "<FILL>"
+  intent: "<FILL — 1-3 sentences, fuzzy is fine>"
+  charter_signed: false            # flips true only after the owner signs GDF-CHARTER.md
+  gdf_version: "1.0"
+
+tracker:                           # task/message bus
+  provider: "jira"                 # jira | github-issues
+  jira:
+    site_url: "<FILL — https://<site>.atlassian.net>"
+    project_key: "<FILL — e.g. SCRUM>"
+    board_type: "scrum"
+    approved_label: "gdf-approved" # owner-provenance checked
+    # gotcha: REST via api.atlassian.com/ex/jira/{cloudUuid}/... — never the site URL directly
+  statuses:                        # map GDF lifecycle to this tracker's real statuses
+    todo: "To Do"
+    in_progress: "In Progress"
+    in_review: "In Review"
+    done: "Done"                   # reachable ONLY via merge-SHA transition
+    blocked_human: "Blocked-Human" # create manually if missing (workflow editor)
+    awaiting_owner: "Awaiting-Owner"
+
+git:
+  provider: "github"               # github | gitlab
+  owner: "<FILL>"
+  repo: "<FILL>"
+  trunk: "main"                    # or dev→main two-stage; declare what you actually use
+  merge_method: "squash"           # linear history; one commit = one PR = one task
+  machine_account: "<FILL — e.g. gdf-bot>"
+  required_trailers: ["GDF-Agent", "GDF-Task", "GDF-Run"]
+  protected_branches_configured: false   # flips true after owner sets protection (see permission-matrix §2)
+
+quality_gate:                      # a QG status check MUST exist; pick the provider
+  provider: "sonarcloud"           # sonarcloud | ci-native (coverage gate in CI) | <other>
+  sonarcloud:
+    organization: "<FILL>"
+    project_key: "<FILL — usually owner_repo>"
+    automatic_analysis_disabled: false   # MUST flip true before first CI run (gotcha #1)
+  thresholds:
+    coverage_min: 80
+    duplication_max: 3
+    ratings: "A"
+
+security_scans:
+  gitleaks: true                   # NOT configurable — always on, incl. spike branches
+  dependency_audit: true           # NOT configurable — pip-audit/npm audit + slopsquat check
+  semgrep: "<FILL — true|false>"   # optional; CLI fallback `semgrep ci` if MCP times out
+
+artifact_store:                    # "a versioned store with immutable promote" — or none
+  provider: "<FILL — jfrog | ghcr | none>"
+  jfrog:
+    platform_url: "<FILL or n/a>"
+    docker_repo: "<FILL — hyphens, never underscores (gotcha #6)>"
+    project_key: "<FILL — required on build API calls (gotcha #7)>"
+
+deploy:
+  enabled: "<FILL — true|false>"   # false = GDF stops at merged trunk (fine for many GDF projects)
+  environments:
+    staging:
+      auto_deploy_on_trunk: true
+    production:
+      via: "tag + environment protection"
+      required_reviewer: "owner"   # the async-review moment with teeth — NOT removable
+  target: "<FILL — ecs-ssh | k8s | vps | none>"
+
+ci_secrets_required:               # NAMES only — gdf-check verifies they exist in CI, values never here
+  - "<FILL — e.g. SONAR_TOKEN>"
+  - "<FILL — e.g. JFROG_PASSWORD>"
+  - "<FILL — e.g. DEPLOY_SSH_KEY (Actions env-scoped, forced-command)>"
+
+zones:                             # ⛔ globs for THIS repo (extends constitution defaults)
+  blocked_globs:
+    - "**/auth/**"
+    - "**/migrations/**"
+    - ".github/workflows/**"
+    - "<FILL — project-specific, or remove>"
+  pii_columns_registry: "<FILL — path to canonical schema, or n/a>"
+
+limits:                            # tunables (defaults from the design council; change deliberately)
+  pr_diff_cap_loc: 600
+  low_tier_max_loc: 150
+  backpressure_unreviewed_merges: 5
+  backpressure_unreviewed_high: 1
+  owner_silence_pause_days: 3
+  stale_task_minutes: 45
+  throwback_escalate_at: 3

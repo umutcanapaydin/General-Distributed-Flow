@@ -11,6 +11,9 @@ DISCOVERY/SHAPING ──► BUILD ──► GATE ──► MERGE ──► DEPLO
    (PM + owner)      (builder)  (CI+QG+bench)  (agent, gated)  (CI-only, env-protected)
 ```
 
+- **Intake precondition (GDF-006):** `gdf-config.yaml` filled from the template (tracker, git,
+  QG, artifacts, deploy, scans, ⛔ globs, limits) + charter signed + `scripts/gdf-check.sh` GREEN.
+  The check is the gate — no tasks/branches/PRs before it passes.
 - **Discovery/Shaping:** PM agent converts fuzzy intent into Jira tasks with Given/When/Then
   acceptance criteria (AC); **owner batch-approves AC async** (timeboxed: silence past the box =
   provisional approval, flagged on the task). AC hash-frozen at creation (OVR-4). Design happens

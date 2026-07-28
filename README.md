@@ -36,8 +36,16 @@ project **graduates to GP governance**. Fast lane ≠ back door.
 4. `permission-matrix.md` — who may do what in git; credentials custody; always-blocking ops
 5. `agents/` — PM, Builder, and bench-seat profiles
 6. `decisions.md` — GDF ADRs (GDF-001 names, in plain text, what this flow overrides and why)
-7. `templates/` — per-project charter, task format
+7. `templates/` — per-project charter, task format, **`gdf-config.template.yaml` (mandatory intake)**
 8. `docs/toolchain-profile-reference.md` — the reference CI/QG/artifact/deploy stack + gotcha pack
+
+## Intake gate (GDF-006 — executable, not documentary)
+
+Every GDF project starts by filling `gdf-config.yaml` (from the template): tracker, git host,
+quality gate, artifact store, deploy target, scans, ⛔ globs, limits. **`scripts/gdf-check.sh`
+must PASS before any task, branch, or PR exists** — it verifies all fields are filled, no secret
+values leaked into the config, the charter is signed, branch protection is confirmed, and the
+known toolchain gotchas (e.g. SonarCloud automatic analysis) are handled.
 
 ## Improvement loop
 

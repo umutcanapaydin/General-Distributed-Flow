@@ -70,3 +70,24 @@ only), the 4-phase spec ceremony (one Discovery/Shaping gate), per-PR full E2E (
 affected-flow on MED/HIGH, full E2E nightly), a copied constitution (reference + one-page override
 appendix), and any parallel documentation ecosystem (GP's EXPERIENCE/register/council machinery is
 reused). Specialists and ceremony are added only on demonstrated field need, via GDF ADRs.
+
+
+---
+
+## GDF-006 — Mandatory machine-readable intake config + executable check
+
+**Status:** ACTIVE (2026-07-17; owner directive)
+
+**Decision:** every GDF project begins by filling `gdf-config.yaml` (template in `templates/`):
+tracker choice + keys, git host/repo/trunk, quality-gate provider + thresholds (SonarCloud or
+CI-native), artifact store (or none), deploy target (or none), optional scans, per-repo ⛔ globs,
+and the tunable limits. `scripts/gdf-check.sh` validates it — placeholders, leaked secret values
+(names only allowed), signed charter, confirmed branch protection, known gotcha preconditions —
+and **must pass before any task, branch, or PR exists.** The PM agent collects the answers from
+the owner as questions at kickoff; it never guesses toolchain facts.
+
+**Rationale:** the harvested SDLC design assumed a fixed toolchain; GDF is profile-based, so the
+profile must be declared, not inferred — and per F1 doctrine, declared means machine-checked.
+
+**Mitigation if violated:** work products created before a green gdf-check are invalid; tripwire 5
+(anomalous behavior) applies.
