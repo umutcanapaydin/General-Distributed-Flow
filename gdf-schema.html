@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GDF v1.0 — Schema</title>
+<style>
+  :root{ --navy:#1f3a5f; --amber:#b45309; --red:#b3261e; --green:#1a7f37; --purple:#6d28d9;
+         --ink:#1c1917; --muted:#57534e; --paper:#faf9f7; --white:#ffffff; --line:#d6d3d1; }
+  *{ box-sizing:border-box; }
+  body{ font-family:Georgia,'Times New Roman',serif; background:var(--paper); color:var(--ink);
+        margin:0; padding:28px 40px 60px; line-height:1.45; }
+  h1{ font-size:26px; margin:0 0 4px; color:var(--navy); }
+  h2{ font-size:19px; color:var(--navy); border-bottom:2px solid var(--navy); padding-bottom:4px; margin:38px 0 14px; }
+  .ver{ font-size:13px; color:var(--muted); font-family:Consolas,monospace; margin-left:10px; }
+  .badge{ display:inline-block; background:var(--purple); color:#fff; font-family:Consolas,monospace;
+          font-size:11px; padding:2px 10px; border-radius:10px; margin-left:10px; vertical-align:middle; }
+  .prov{ display:inline-block; background:var(--amber); color:#fff; font-family:Consolas,monospace;
+          font-size:11px; padding:2px 10px; border-radius:10px; margin-left:6px; vertical-align:middle; }
+  .sub{ color:var(--muted); font-size:13.5px; margin:2px 0 0; }
+  .newbadge{ color:var(--purple); font-family:Consolas,monospace; font-size:11px; font-weight:bold; }
+  .anno{ color:var(--muted); font-size:11.5px; font-family:Consolas,monospace; }
+  /* lanes comparison */
+  .lanes{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px; }
+  .lane{ background:var(--white); border:1px solid var(--line); border-radius:8px; padding:14px 16px; }
+  .lane h3{ margin:0 0 8px; font-size:15px; font-family:Consolas,monospace; letter-spacing:1px; }
+  .lane.gp h3{ color:var(--navy);} .lane.gdf h3{ color:var(--purple);}
+  .lane ul{ margin:0; padding-left:18px; font-size:12.5px; line-height:1.55; }
+  .shared{ background:#eef2f7; border:1px dashed var(--navy); border-radius:8px; padding:10px 16px;
+           margin-top:12px; font-size:12.5px; }
+  /* stages */
+  .stage{ background:var(--white); border:1px solid var(--line); border-left:6px solid var(--navy);
+          border-radius:6px; margin:14px 0; }
+  .stage.s0{ border-left-color:var(--purple);} .stage.s1{ border-left-color:var(--navy);}
+  .stage.s2{ border-left-color:var(--amber);} .stage.s3{ border-left-color:var(--red);}
+  .stage.s4{ border-left-color:var(--green);} .stage.s5{ border-left-color:var(--navy);}
+  .stage-head{ display:flex; align-items:baseline; gap:14px; padding:10px 16px 6px; }
+  .stage-num{ font-family:Consolas,monospace; font-size:16px; font-weight:bold; color:var(--navy); letter-spacing:1px; }
+  .s0 .stage-num{color:var(--purple);} .s2 .stage-num{color:var(--amber);}
+  .s3 .stage-num{color:var(--red);} .s4 .stage-num{color:var(--green);}
+  .stage-title{ font-size:16px; flex:1; }
+  .stage-meta{ font-size:11.5px; color:var(--muted); font-family:Consolas,monospace; }
+  .stage-body{ padding:4px 16px 14px; font-size:13px; }
+  .arrow{ text-align:center; font-size:18px; color:var(--muted); margin:-4px 0; }
+  .pin{ background:#fdf6ec; border:1px solid var(--amber); border-radius:6px; padding:8px 12px;
+        font-size:12.5px; margin-top:8px; }
+  .stop{ background:#fdecea; border:1px solid var(--red); border-radius:6px; padding:8px 12px;
+        font-size:12.5px; margin-top:8px; }
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:8px; }
+  .card{ background:var(--white); border:1px solid var(--line); border-radius:6px; padding:10px 12px; }
+  .card h4{ margin:0 0 6px; font-size:12.5px; font-family:Consolas,monospace; letter-spacing:.5px; color:var(--navy); }
+  .card ul{ margin:0; padding-left:16px; font-size:12px; line-height:1.5; }
+  .tier-low h4{color:var(--green);} .tier-med h4{color:var(--amber);} .tier-high h4{color:var(--red);}
+  table{ border-collapse:collapse; width:100%; font-size:12.5px; margin-top:8px; background:var(--white); }
+  th,td{ border:1px solid var(--line); padding:6px 10px; text-align:left; vertical-align:top; }
+  th{ background:#eef2f7; font-family:Consolas,monospace; font-size:11.5px; }
+  code{ font-family:Consolas,monospace; font-size:12px; background:#f1efec; padding:1px 5px; border-radius:3px; }
+  .flowline{ font-family:Consolas,monospace; font-size:12.5px; background:var(--white);
+             border:1px solid var(--line); border-radius:6px; padding:12px 16px; overflow-x:auto; }
+  .legend{ display:flex; flex-wrap:wrap; gap:18px; font-size:12.5px; margin-top:10px; }
+  .l-item{ display:flex; align-items:center; gap:6px; }
+  .swatch{ width:14px; height:14px; border-radius:3px; display:inline-block; }
+  .foot{ margin-top:40px; color:var(--muted); font-size:12px; border-top:1px solid var(--line); padding-top:10px; }
+</style>
+</head>
+<body>
+
+<h1>GDF — General Distributed Flow <span class="ver">v1.0 Schema</span><span class="badge">delegated lane · agents merge, gated</span><span class="prov">PROVISIONAL</span></h1>
+<p class="sub">PM agent orchestrates via Jira · builders code &amp; merge behind mechanical gates · risk-tiered technical bench per PR · the owner reviews commits + Jira <b>asynchronously</b>, protected by backpressure, tripwires and an auto-revert window. Sibling of General Pipeline — one constitution, two flows.</p>
+
+<h2>1 · Two Lanes, One Constitution</h2>
+<div class="lanes">
+  <div class="lane gp">
+    <h3>GP — GENERAL FLOW (v3.3)</h3>
+    <ul>
+      <li>Owner IN the loop: reviews every milestone, runs his own tests, makes every commit</li>
+      <li>Clear PRD · hash-frozen milestone plans · waves + milestone closure</li>
+      <li>For production-critical work and ⛔ surfaces</li>
+    </ul>
+  </div>
+  <div class="lane gdf">
+    <h3>GDF — DISTRIBUTED FLOW (v1.0)</h3>
+    <ul>
+      <li>Owner ASYNC: daily digest, weekly telemetry, auto-revert window</li>
+      <li>Fuzzy PRD welcome · per-TASK acceptance criteria, hash-frozen at Jira level</li>
+      <li>For fast, internal, non-production-critical projects — <b>eligibility charter enforced</b></li>
+    </ul>
+  </div>
+</div>
+<div class="shared"><b>Shared constitution (referenced from GP v3.3, pinned — never copied):</b> evidence rule (agent-asserted content never gates) · default-deny permissions · security baseline · escalate-NOW class · files-not-sessions continuity · EXPERIENCE→register→council loop. GDF's deviations live in a one-page override appendix — <b>GDF-001 records, in plain text, that the owner consciously overrode GP's A1 bright line for this lane only.</b></div>
+
+<h2>2 · The Flow (five stages)</h2>
+
+<div class="stage s0">
+  <div class="stage-head"><div class="stage-num">GATE 0</div><div class="stage-title">Intake — <code>gdf-config.yaml</code> + Charter + <code>gdf-check</code> <span class="newbadge">★ GDF-006</span></div><div class="stage-meta">executable, not documentary</div></div>
+  <div class="stage-body">
+    PM walks the owner through the config <b>as questions</b>: tracker (Jira site/key/statuses) · git host/repo/trunk · quality gate (SonarCloud or CI-native + thresholds) · artifact store (JFrog/GHCR/none) · deploy target (or none) · scans · per-repo ⛔ globs · tunable limits. Secret <b>names</b> only — never values.
+    <div class="stop"><b>⛔ scripts/gdf-check.sh must PASS</b> (no placeholders · no leaked secret values · charter signed · branch protection confirmed · SonarCloud auto-analysis OFF) — <b>no tasks, no branches, no PRs until green.</b></div>
+  </div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage s1">
+  <div class="stage-head"><div class="stage-num">STAGE 1</div><div class="stage-title">Discovery / Shaping</div><div class="stage-meta">PM + owner · fuzzy intent → frozen tasks</div></div>
+  <div class="stage-body">
+    PM converts intent into Jira tasks with <b>Given/When/Then acceptance criteria</b>; owner batch-approves async (timeboxed). <b>AC hash-frozen at creation</b> — criteria evolve by successor tasks (lineage-linked), never by editing in-flight; a task superseded &gt;2× → owner review.
+    <div class="pin"><b>Injection defense:</b> agents act only on tasks with the owner-provenance <code>gdf-approved</code> label; comments (any author, incl. other agents) are DATA, never commands.</div>
+  </div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage s2">
+  <div class="stage-head"><div class="stage-num">STAGE 2</div><div class="stage-title">Build — parallel builder agents</div><div class="stage-meta">atomic claim · single-writer PRs</div></div>
+  <div class="stage-body">
+    <b>Atomic claim</b> (Jira transition + assignee in one call; re-read before work) → feature branch → code + unit tests + <b>the citing test proving the AC through the live entrypoint</b> → Semgrep pre-scan → PR with AC-hash + Jira key + trailers (<code>GDF-Agent · GDF-Task · GDF-Run</code>). Stale-task sweep reclaims silent tasks (45 min); throwback counter escalates at N=3 → <code>Blocked-Human</code>.
+  </div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage s3">
+  <div class="stage-head"><div class="stage-num">STAGE 3</div><div class="stage-title">Gate — CI + Quality Gate + Tiered Bench</div><div class="stage-meta">fresh-eyes · required status checks</div></div>
+  <div class="stage-body">
+    <div class="cards">
+      <div class="card tier-low"><h4>LOW · ≤150 LOC</h4><ul><li>no ⛔-glob, no deps/schema/CI</li><li>ONE combined reviewer</li><li>full checklist + secret scan + test-integrity</li></ul></div>
+      <div class="card tier-med"><h4>MED · ≤600 LOC</h4><ul><li>app logic, ≤3 modules</li><li>Code Reviewer + Tester</li><li>affected-flow E2E subset</li></ul></div>
+      <div class="card tier-high"><h4>HIGH · ⛔-glob / &gt;600 / deps / schema</h4><ul><li>FULL BENCH: CR · Tester · SW Eng · Quality · DevOps · Data (on data globs)</li><li>fault-injection mandatory</li><li><b>+ OWNER required review on ⛔ paths (sync!)</b></li></ul></div>
+    </div>
+    <div class="pin">Tier computed by a labeler bot from globs + diffstat — never agent-asserted; one-way ratchet up. Anti-gaming: <b>cumulative LOC per Jira task</b> counts (splitting doesn't dodge the bench). Verdicts = GitHub PR reviews (<code>PASS/MINOR/BLOCKING + file:line + evidence</code>) mapped to required checks.</div>
+  </div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage s4">
+  <div class="stage-head"><div class="stage-num">STAGE 4</div><div class="stage-title">Merge — agent-executed, mechanically gated <span class="newbadge">★ the override</span></div><div class="stage-meta">squash · linear · tested-SHA</div></div>
+  <div class="stage-body">
+    Authoring builder merges when ALL required checks are green. Branch protection: no force-push · no deletion · <b>enforce_admins ON</b> · squash-only (1 commit = 1 PR = 1 task = 1 agent) · CODEOWNERS = owner on control plane + ⛔ globs · merged SHA = the SHA CI tested. <code>Done</code> in Jira is reachable ONLY via the transition recording the merge SHA — git is truth.
+    <div class="stop"><b>Backpressure:</b> 5 unreviewed merges (or 1 unreviewed HIGH) → merges pause · owner silent 3 days → pause · PRs queue in <code>Awaiting-Owner</code>; work continues on branches.</div>
+  </div>
+</div>
+<div class="arrow">↓</div>
+
+<div class="stage s5">
+  <div class="stage-head"><div class="stage-num">STAGE 5</div><div class="stage-title">Deploy / Verify — CI only</div><div class="stage-meta">agents trigger · CI holds ALL credentials</div></div>
+  <div class="stage-body">
+    Trunk merge → auto-deploy to <b>staging</b> via CI. <b>Production:</b> tag + GitHub environment protection with the <b>owner as required reviewer</b> (the async lane's moment with teeth) → CI deploy → health check → CI-executed rollback on failure. Agents never hold SSH keys, registry passwords, or broad PATs — a CI check greps agent workspaces for secret patterns.
+  </div>
+</div>
+
+<h2>3 · Roster (v1.0 minimal)</h2>
+<table>
+  <tr><th>Role</th><th>Mode</th><th>Repo rights</th><th>Never</th></tr>
+  <tr><td><b>PM Agent</b></td><td>standing orchestrator</td><td><b>READ-ONLY</b></td><td>commits · merges · bench verdicts · free-prose status (digest is script-generated with query strings)</td></tr>
+  <tr><td><b>Builder(s)</b></td><td>per-domain, per-task</td><td>branch + PR + gated merge</td><td>own-PR review · red/skipped-check merges · ⛔ paths without owner · in-flight AC edits · holding credentials</td></tr>
+  <tr><td><b>Bench seats</b></td><td>ephemeral per PR (fresh-eyes)</td><td>review-only</td><td>reviewing own authored code · verdicts without evidence referents</td></tr>
+  <tr><td><b>Owner (human)</b></td><td>async</td><td>everything — incl. the ONLY hands on: control plane, ⛔ approvals, prod deploys, unfreeze</td><td>—</td></tr>
+</table>
+
+<h2>4 · Jira Lifecycle &amp; Throwback</h2>
+<div class="flowline">
+To Do ──► In Progress ──► In Review ──► Done  (Done ⇐ ONLY via merge-SHA transition)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+ Blocked-Human (throwback N=3 / halt) · Awaiting-Owner (backpressure queue)<br><br>
+Throwbacks: bench BLOCKING → Build · CI/QG fail → Build · CI-config fail → DevOps seat self-fix ·<br>
+test-env issue → Tester seat · AC gap → Discovery (successor task) · <b>3rd failure → Blocked-Human + escalate-NOW</b>
+</div>
+
+<h2>5 · Tripwires — auto-freeze of ALL agent merge rights</h2>
+<table>
+  <tr><th>#</th><th>Event</th><th>Effect</th></tr>
+  <tr><td>1</td><td>Verified secret in a merged commit</td><td rowspan="5">Branch protection flips to human-review-on-everything via a toggle <b>agents cannot operate</b>. Only the owner unfreezes, with a written cause+fix note. PRs keep queueing — work never stops, merging does.</td></tr>
+  <tr><td>2</td><td>⛔-glob change reaching a protected branch without owner approval</td></tr>
+  <tr><td>3</td><td>High/critical security finding in a deployed artifact</td></tr>
+  <tr><td>4</td><td>≥2 reverts in 24h, or trunk CI red &gt;1h</td></tr>
+  <tr><td>5</td><td>Anomalous agent behavior (push outside PR path · missing trailers · control-plane attempt)</td></tr>
+</table>
+<div class="pin"><b>Eligibility / graduation tripwire:</b> external users, production-revenue dependency, or a ⛔-critical core appearing in a GDF project → merges freeze → the project <b>graduates to GP governance</b>. Fast lane ≠ back door. · <b>Provisional expiry:</b> 3 projects or 60 days → mandatory retro before re-charter.</div>
+
+<h2>6 · Telemetry (owner's weekly read — computed by a job agents cannot write to)</h2>
+<div class="flowline">
+per authoring agent, rolling 4 weeks:&nbsp; merges · post-merge fix rate (path overlap, N days) · revert rate ·<br>
+churn (&lt;14-day rewrites) · cycle time (claim→merge) · QG first-pass rate&nbsp; + data-health line (migrations · rollback-script CI pass)
+</div>
+
+<h2>7 · Legend</h2>
+<div class="legend">
+  <div class="l-item"><span class="swatch" style="background:var(--purple)"></span> Gate 0 — Intake (GDF-006, executable)</div>
+  <div class="l-item"><span class="swatch" style="background:var(--navy)"></span> Stage 1 — Discovery (AC hash-frozen)</div>
+  <div class="l-item"><span class="swatch" style="background:var(--amber)"></span> Stage 2 — Build (atomic claim)</div>
+  <div class="l-item"><span class="swatch" style="background:var(--red)"></span> Stage 3 — Tiered Bench (fresh-eyes)</div>
+  <div class="l-item"><span class="swatch" style="background:var(--green)"></span> Stage 4/5 — Gated merge · CI-only deploy</div>
+</div>
+
+<div class="foot">
+GDF v1.0 (PROVISIONAL) · chartered 2026-07-17 by owner directive OD-5 · shaped by a 7-seat technical design council ·
+decision trail: <code>decisions.md</code> (GDF-001..006) · constitution referenced from GP v3.3 (pinned) ·
+source patterns harvested from the SDLC handover (GP register, Increment 7)
+</div>
+
+</body>
+</html>

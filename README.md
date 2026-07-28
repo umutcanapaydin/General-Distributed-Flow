@@ -38,6 +38,7 @@ project **graduates to GP governance**. Fast lane ≠ back door.
 6. `decisions.md` — GDF ADRs (GDF-001 names, in plain text, what this flow overrides and why)
 7. `templates/` — per-project charter, task format, **`gdf-config.template.yaml` (mandatory intake)**
 8. `docs/toolchain-profile-reference.md` — the reference CI/QG/artifact/deploy stack + gotcha pack
+9. `gdf-schema.html` — the whole flow on one page (open in a browser)
 
 ## Intake gate (GDF-006 — executable, not documentary)
 
