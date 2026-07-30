@@ -35,6 +35,16 @@ gated API path only · CODEOWNERS: owner-human on control-plane paths AND ⛔ gl
   enforced by a commit-lint required check. Per-agent audit = `git log` filtered by trailer.
 - The workflow-dispatch token is the soft underbelly: scope to `actions:write` +
   `contents:write` on `release-candidate/*` only; keep it out of agent prompts/logs; rotate; canary.
+- **v4.0 — credential identity ledger (V4C-05, GDF-007):** this section maintains a table with
+  one row per credential NAME: `name · holding identity (CI env / machine account) · scope ·
+  expiry/rotation date`. Recording is v1 and mandatory at intake (gdf-config lists the names);
+  ENFORCEMENT — short-lived scoped tokens, intersection principle (agent may do only what BOTH
+  the owner and the agent identity may), expiry alerting — is a pilot-exit condition (owner: GDF
+  lead). Direction: GitLab-composite-identity / SPIFFE-class infrastructure, not agent-held keys.
+
+  | Credential name | Holding identity | Scope | Expiry / rotation |
+  |---|---|---|---|
+  | `<NAME>` | `<CI env secret / gdf-bot>` | `<repo/env/action scope>` | `<date · schedule>` |
 
 ## 4. Always-blocking (agents may NEVER, even in GDF)
 

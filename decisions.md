@@ -91,3 +91,26 @@ profile must be declared, not inferred — and per F1 doctrine, declared means m
 
 **Mitigation if violated:** work products created before a green gdf-check are invalid; tripwire 5
 (anomalous behavior) applies.
+
+---
+
+## GDF-007 — v4.0 constitution adoption: base-pinned policy, credential identity v1, tested injection defense
+
+**Status:** ACTIVE (2026-07-30; GP v4.0 council, `General_Pipeline/v4.0-ratification.md`)
+
+**Decision:** three GP v4.0 adoptions bind GDF:
+1. **Base-pinned policy invariant (V4C-06):** any policy/instruction consumed by a bench seat,
+   gate, or agent is read from the protected base ref — never from the PR/comment/task under
+   evaluation. (Already GDF practice via owner-provenance labels; now a named constitution
+   invariant. Market grounding: comment-driven credential theft, head-branch review-policy
+   override, one-PR→RCE on a review bot — all 2026.)
+2. **Credential identity v1 (V4C-05):** `permission-matrix.md` §3 records, per credential NAME:
+   the holding identity, its scope, and its expiry. ENFORCEMENT (short-lived scoped tokens,
+   intersection principle, expiry alerting) is a pilot-exit condition, owner: GDF lead.
+3. **Injection defense becomes a TESTED control (V4C-10):** the first GDF pilot includes an
+   adversarial exercise — planted malicious comment/task/PR content (Comment-and-Control class)
+   must NOT move an agent; fixture + result recorded. **Blocking precondition for any GDF
+   scale-out.** Until it passes, GDF's injection-defense claim stays PARTIAL, honestly.
+
+**Note:** GDF-CONSTITUTION's GP pin moves to **GP v4.0** at the next charter signing; existing
+pins stay until then (pinned means pinned).
