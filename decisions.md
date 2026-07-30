@@ -114,3 +114,60 @@ profile must be declared, not inferred — and per F1 doctrine, declared means m
 
 **Note:** GDF-CONSTITUTION's GP pin moves to **GP v4.0** at the next charter signing; existing
 pins stay until then (pinned means pinned).
+
+---
+
+## GDF-008 — v1.1: market-informed hardening (8 adopts, budget ceiling)
+
+**Status:** ACTIVE (2026-07-30; 6-seat blind GDF council: Software, Quality/Test, Security,
+DevOps, SRE, Skeptic; chair-tallied; MINOR bump 6/6 CONCUR)
+
+**Adopted (GDF11 series):**
+1. **GDF11-01 (AWC, guardrail)** — server-side AC invariants: Jira required-fields/automation
+   rejects empty Given/When/Then at creation; assignee-only key transitions; `gdf-config.yaml`
+   gains `tracker_invariants_configured` flags; `gdf-check` WARNS (not fails) if unconfirmed.
+   *Condition: owner confirms the Jira config before pilot start; closure artifact = config
+   evidence (the flag is self-attested — the artifact is the real control, DevOps).*
+2. **GDF11-02 (template)** — dual evidence: builder attaches per-AC self-check evidence in the PR
+   (AC-hash keyed); the bench marks each AC verified/failed INDEPENDENTLY — two artifacts, never
+   merged. *Interaction rule (Software): builder self-check evidence is EXCLUDED from bench-seat
+   inputs, or GDF11-03 silently breaks.*
+3. **GDF11-03 (guardrail, 6/6)** — bench input scoping: each ephemeral seat receives ONLY the task
+   spec (AC+hash), the diff, and CI results — never the builder's reasoning or comment thread.
+   Doubles as injection-surface reduction (compensating control while GDF-007's injection test
+   awaits the pilot — Security).
+4. **GDF11-05+06 MERGED (guardrail)** — recorded override governance + control telemetry: a bench
+   BLOCKING is overridable ONLY by the owner, with a written reason on the PR; the daily digest
+   carries a mechanical line — overrides, waived checks, stale-reclaims, throwback counts; the
+   SAME control overridden/bypassed 3× → review the CONTROL, not the people.
+5. **GDF11-07 NARROWED (AWC, guardrail)** — the one mechanical rule only: **stale approvals are
+   dismissed on new commits and the bench re-triggers on push** — branch-protection CONFIG, not
+   prose (stale-approval-riding-new-commits is a live 2026 exploit class — Security). The full
+   PR-state taxonomy stays deferred (trigger: first pilot PR hits an unmapped state).
+   *Condition: config artifact before pilot.*
+6. **GDF11-08 (doc)** — merge serialization: >1 ready PR merges FIFO; CI re-runs on the exact
+   merged SHA after any rebase; GitHub native merge queue where available, with the stated
+   fallback (require-branches-up-to-date + serialized auto-merge) on plans without it.
+7. **GDF11-09 (doc)** — deploy/verify inherits GP v4.0's scheduled-journey monitoring (V4C-07) and
+   stack-conditional canary/rehearsed-rollback (V4C-08) BY REFERENCE to the pinned constitution —
+   never copied text.
+8. **GDF11-10 (AWC, guardrail, 6/6)** — bench SLA + fail-closed timeout: timebox per tier; a seat
+   that hasn't returned escalates to the owner as ONE deduped, machine-readable event; silence
+   never unblocks anything. *Conditions: provisional SLA set at pilot kickoff; timeout path
+   DRILLED in the pilot; recalibration at pilot retro (SRE/Skeptic).*
+
+**Deferred with triggers:** GDF11-04 cross-model bench routing → first HIGH-tier pilot task ·
+GDF11-07 full state taxonomy → first unmapped PR state.
+
+**Skeptic dissents (verbatim):**
+1. "GDF11-01 was re-tabled from a GP deferral with no new evidence. Re-tabling on owner
+   preference alone is fashion; the deferral trigger was never met. Recorded so the pattern is
+   countable if repeated."
+2. "Seven adopts into a machine that has never run is my ceiling, not my comfort. If the pilot
+   has not started by the next council, this seat moves to REJECT-by-default on all further
+   pre-pilot candidates."
+
+**Standing concerns logged:** the digest must stay scannable (SRE — it now carries overrides,
+waived, stale-reclaims, throwbacks, state-diverged, timeouts); an unread digest reduces the
+telemetry layer to theater (Quality); pilot must measure dual-evidence catch-rate vs cost before
+any further hardening.

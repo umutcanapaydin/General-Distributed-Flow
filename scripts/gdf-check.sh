@@ -44,6 +44,11 @@ if grep -qE '^\s*enabled:\s*"?true' "$CFG"; then
   grep -qE 'required_reviewer:\s*"?owner' "$CFG" && ok "prod deploy owner-gated" || bad "production.required_reviewer must be owner (GDF-003)"
 else ok "deploy disabled — trunk is the end of the line"; fi
 
+say "[9] tracker-side invariants (v1.1, GDF11-01 — WARN only, never fails intake)"
+warn(){ say "  ⚠️  $*"; }
+grep -qE 'ac_required_at_creation:\s*true' "$CFG" && ok "AC-required-at-creation confirmed" || warn "ac_required_at_creation not confirmed — configure Jira required fields/automation, keep the config evidence, then flip the flag"
+grep -qE 'assignee_only_transitions:\s*true' "$CFG" && ok "assignee-only transitions confirmed" || warn "assignee_only_transitions not confirmed — restrict key transitions to the assignee, then flip the flag"
+
 say ""
 if [ "$FAIL" -eq 0 ]; then say "GDF-CHECK PASS — intake complete, Discovery may begin."; exit 0
 else say "GDF-CHECK FAIL — fix the ❌ items; no tasks, no branches, no PRs until green."; exit 1; fi

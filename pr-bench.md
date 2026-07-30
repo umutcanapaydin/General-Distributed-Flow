@@ -1,9 +1,27 @@
-# GDF PR Bench — the risk-tiered technical review gate
+# GDF PR Bench — the risk-tiered technical review gate (v1.1)
 
 > Every PR passes a bench of fresh-eyes agent reviewers (never the author). Verdicts are
 > **GitHub PR reviews** in structured format — platform artifacts, timestamped, per-seat
 > attributable — and the tier's seat-set maps to **required status checks**: merge is mechanically
 > blocked until the tier's seats are green. The PM cannot override; only the owner can (audited).
+>
+> **v1.1 bench rules (GDF-008):**
+> - **Input scoping (GDF11-03, 6/6):** each seat receives ONLY the task spec (AC + frozen hash),
+>   the diff, and CI results — NEVER the builder's reasoning, commit-message narrative, or the
+>   comment thread. Rationale-blind fresh eyes; also shrinks the injection surface into the bench.
+>   The builder's per-AC self-check evidence (below) is likewise EXCLUDED from seat inputs.
+> - **Dual evidence (GDF11-02):** the PR description carries the builder's per-AC self-check
+>   evidence (AC-hash keyed); the bench marks each AC verified/failed INDEPENDENTLY in its
+>   verdict. Two artifacts, never merged — self-graded homework is not evidence.
+> - **Recorded overrides + control telemetry (GDF11-05+06):** a BLOCKING is overridable ONLY by
+>   the owner, with a written reason on the PR; the daily digest counts overrides, waived checks,
+>   stale-reclaims, throwbacks — the SAME control hit 3× → review the CONTROL.
+> - **SLA + fail-closed timeout (GDF11-10, 6/6):** timebox per tier (provisional values set at
+>   pilot kickoff); a seat that hasn't returned escalates to the owner as ONE deduped,
+>   machine-readable event; silence never unblocks. Timeout path is DRILLED during the pilot.
+> - **Stale approvals (GDF11-07n):** dismissed on new commits; bench re-triggers on push —
+>   branch-protection CONFIG, evidenced before pilot start.
+> - Deferred with trigger: cross-model seat routing at HIGH (GDF11-04) — first HIGH-tier pilot task.
 
 ## 1. Tiers (assigned by a labeler bot from globs + diffstat — never agent-asserted; one-way ratchet up)
 

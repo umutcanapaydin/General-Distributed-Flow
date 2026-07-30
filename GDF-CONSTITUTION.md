@@ -4,10 +4,12 @@
 > single source of truth is the General Pipeline repo; GDF records ONLY its deltas below.
 > **If the override appendix grows past one page, that is the drift alarm.**
 
-## 1. Inherited core (binding, unchanged — pinned to GP v3.3)
+## 1. Inherited core (binding, unchanged — pinned to **GP v4.0** as of GDF v1.1)
 
-Source: `github.com/SADCAIVibe/General_Pipeline` → `general_pipeline_v3.3/` (pin: the v3.3 package
-as of commit at adoption; re-pin deliberately at GDF minor versions).
+Source: `github.com/SADCAIVibe/General_Pipeline` → `general_pipeline_v4.0/` (re-pinned
+deliberately at the v1.1 cut per GDF-007/GDF-008; charters signed before 2026-07-30 keep their
+original v3.3 pin — pinned means pinned. The v4.0 pin additionally binds the **base-pinned policy
+invariant** and **friction/bypass telemetry** constitution items).
 
 1. **Evidence rule:** anything feeding trust, promotion, or a gate is computed from git/CI/hooks
    against protected refs the agents cannot move. Agent-asserted content (Jira comments, reports,
@@ -73,7 +75,7 @@ Agents may keep opening PRs while frozen — work queues, it doesn't stop.
 
 ## 4. Provisional status & graduation
 
-- GDF v1.0 is **PROVISIONAL**: after 3 projects or 60 days of field use → mandatory retrospective
+- GDF v1.1 is **PROVISIONAL**: after 3 projects or 60 days of field use → mandatory retrospective
   (GP retro format: verdict buckets + retired count) before re-charter.
 - **Project graduation rule:** external users, production-revenue dependency, or a ⛔-critical core
   appearing in a GDF project → merges freeze → project migrates to GP governance. Silently

@@ -1,8 +1,14 @@
 # GDF — General Distributed Flow
 
-> **Status: v1.0 DRAFT — PROVISIONAL charter** (expires after 3 projects or 60 days of field use,
+> **Status: v1.1 DRAFT — PROVISIONAL charter** (expires after 3 projects or 60 days of field use,
 > whichever first → mandatory retrospective before re-charter). Chartered by owner directive OD-5
-> (2026-07-17), shaped by a 7-seat technical design council. Decision record: `decisions.md` GDF-001.
+> (2026-07-17), shaped by a 7-seat technical design council; **v1.1 (2026-07-30): market-informed
+> hardening, 6-seat GDF council — 8 adopts** (server-side AC invariants · dual evidence · bench
+> input scoping · recorded overrides + control telemetry · stale-approval dismissal · FIFO merge
+> serialization · deploy checks by GP-v4.0 reference · bench SLA fail-closed). Decision records:
+> `decisions.md` GDF-001 (charter) · GDF-007 (GP v4.0 constitution adoptions) · GDF-008 (v1.1).
+> **Still UNPILOTED — the first pilot is the next evidence generator; pre-pilot rule additions are
+> frozen (Skeptic ceiling, GDF-008).**
 
 ## What GDF is
 
@@ -20,7 +26,7 @@ GDF is the sibling of **General Pipeline (GP)** — one constitution, two flows:
 | Git | owner-only | agents commit, open PRs, **merge** (gated) |
 | Spec | PRD + hash-frozen milestone plans | rolling backlog; per-TASK acceptance criteria, hash-frozen at Jira level |
 | Use when | PRD/features are clear; production-critical; ⛔ surfaces | **PRD NOT yet clear; speed matters; non-production-critical projects** |
-| Versioning | v3.3 (own lineage) | v1.0 (own lineage, independent) |
+| Versioning | v4.0 (own lineage) | v1.1 (own lineage, independent) |
 
 ## Eligibility (hard rule — see GDF-CHARTER template)
 

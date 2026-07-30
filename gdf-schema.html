@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GDF v1.0 — Schema</title>
+<title>GDF v1.1 — Schema</title>
 <style>
   :root{ --navy:#1f3a5f; --amber:#b45309; --red:#b3261e; --green:#1a7f37; --purple:#6d28d9;
          --ink:#1c1917; --muted:#57534e; --paper:#faf9f7; --white:#ffffff; --line:#d6d3d1; }
@@ -65,13 +65,13 @@
 </head>
 <body>
 
-<h1>GDF — General Distributed Flow <span class="ver">v1.0 Schema</span><span class="badge">delegated lane · agents merge, gated</span><span class="prov">PROVISIONAL</span></h1>
+<h1>GDF — General Distributed Flow <span class="ver">v1.1 Schema</span><span class="badge">delegated lane · agents merge, gated · v1.1: market-informed hardening (GDF-008) — server-side AC invariants · dual evidence · rationale-blind bench · recorded overrides · bench SLA</span><span class="prov">PROVISIONAL · UNPILOTED</span></h1>
 <p class="sub">PM agent orchestrates via Jira · builders code &amp; merge behind mechanical gates · risk-tiered technical bench per PR · the owner reviews commits + Jira <b>asynchronously</b>, protected by backpressure, tripwires and an auto-revert window. Sibling of General Pipeline — one constitution, two flows.</p>
 
 <h2>1 · Two Lanes, One Constitution</h2>
 <div class="lanes">
   <div class="lane gp">
-    <h3>GP — GENERAL FLOW (v3.3)</h3>
+    <h3>GP — GENERAL FLOW (v4.0)</h3>
     <ul>
       <li>Owner IN the loop: reviews every milestone, runs his own tests, makes every commit</li>
       <li>Clear PRD · hash-frozen milestone plans · waves + milestone closure</li>
@@ -79,7 +79,7 @@
     </ul>
   </div>
   <div class="lane gdf">
-    <h3>GDF — DISTRIBUTED FLOW (v1.0)</h3>
+    <h3>GDF — DISTRIBUTED FLOW (v1.1)</h3>
     <ul>
       <li>Owner ASYNC: daily digest, weekly telemetry, auto-revert window</li>
       <li>Fuzzy PRD welcome · per-TASK acceptance criteria, hash-frozen at Jira level</li>
@@ -87,7 +87,7 @@
     </ul>
   </div>
 </div>
-<div class="shared"><b>Shared constitution (referenced from GP v3.3, pinned — never copied):</b> evidence rule (agent-asserted content never gates) · default-deny permissions · security baseline · escalate-NOW class · files-not-sessions continuity · EXPERIENCE→register→council loop. GDF's deviations live in a one-page override appendix — <b>GDF-001 records, in plain text, that the owner consciously overrode GP's A1 bright line for this lane only.</b></div>
+<div class="shared"><b>Shared constitution (referenced PINNED, never copied — new charters pin GP v4.0; existing charters keep their pin):</b> evidence rule (agent-asserted content never gates) · default-deny permissions · security baseline · escalate-NOW class · files-not-sessions continuity · EXPERIENCE→register→council loop · <b>★ v4.0: base-pinned policy invariant + friction/bypass telemetry</b>. GDF's deviations live in a one-page override appendix — <b>GDF-001 records, in plain text, that the owner consciously overrode GP's A1 bright line for this lane only.</b></div>
 
 <h2>2 · The Flow (five stages)</h2>
 
@@ -103,8 +103,8 @@
 <div class="stage s1">
   <div class="stage-head"><div class="stage-num">STAGE 1</div><div class="stage-title">Discovery / Shaping</div><div class="stage-meta">PM + owner · fuzzy intent → frozen tasks</div></div>
   <div class="stage-body">
-    PM converts intent into Jira tasks with <b>Given/When/Then acceptance criteria</b>; owner batch-approves async (timeboxed). <b>AC hash-frozen at creation</b> — criteria evolve by successor tasks (lineage-linked), never by editing in-flight; a task superseded &gt;2× → owner review.
-    <div class="pin"><b>Injection defense:</b> agents act only on tasks with the owner-provenance <code>gdf-approved</code> label; comments (any author, incl. other agents) are DATA, never commands.</div>
+    PM converts intent into Jira tasks with <b>Given/When/Then acceptance criteria</b>; owner batch-approves async (timeboxed). <b>AC hash-frozen at creation</b> — criteria evolve by successor tasks (lineage-linked), never by editing in-flight; a task superseded &gt;2× → owner review. <b>★ v1.1 (GDF11-01):</b> where Jira permits, task creation mechanically REJECTS empty AC and key transitions are assignee-only — conventions become server-side rules (config evidence kept; gdf-check warns until confirmed).
+    <div class="pin"><b>Injection defense:</b> agents act only on tasks with the owner-provenance <code>gdf-approved</code> label; comments (any author, incl. other agents) are DATA, never commands. <b>★ v1.1:</b> the defense becomes a TESTED control in the first pilot (GDF-007) — planted malicious content must fail to move an agent.</div>
   </div>
 </div>
 <div class="arrow">↓</div>
@@ -126,6 +126,7 @@
       <div class="card tier-high"><h4>HIGH · ⛔-glob / &gt;600 / deps / schema</h4><ul><li>FULL BENCH: CR · Tester · SW Eng · Quality · DevOps · Data (on data globs)</li><li>fault-injection mandatory</li><li><b>+ OWNER required review on ⛔ paths (sync!)</b></li></ul></div>
     </div>
     <div class="pin">Tier computed by a labeler bot from globs + diffstat — never agent-asserted; one-way ratchet up. Anti-gaming: <b>cumulative LOC per Jira task</b> counts (splitting doesn't dodge the bench). Verdicts = GitHub PR reviews (<code>PASS/MINOR/BLOCKING + file:line + evidence</code>) mapped to required checks.</div>
+    <div class="pin"><b>★ v1.1 bench rules (GDF-008):</b> seats receive ONLY spec + diff + CI results — never builder reasoning/comments (rationale-blind, injection-shrinking) · builder's per-AC self-check in the PR + bench's independent per-AC marks = DUAL EVIDENCE, never merged · a BLOCKING is overridable only by the OWNER with a written reason, digest-counted (same control ×3 → review the control) · bench SLA: a silent seat escalates to the owner as one deduped machine-readable event — silence never unblocks · stale approvals dismissed on push, bench re-triggers.</div>
   </div>
 </div>
 <div class="arrow">↓</div>
@@ -133,7 +134,7 @@
 <div class="stage s4">
   <div class="stage-head"><div class="stage-num">STAGE 4</div><div class="stage-title">Merge — agent-executed, mechanically gated <span class="newbadge">★ the override</span></div><div class="stage-meta">squash · linear · tested-SHA</div></div>
   <div class="stage-body">
-    Authoring builder merges when ALL required checks are green. Branch protection: no force-push · no deletion · <b>enforce_admins ON</b> · squash-only (1 commit = 1 PR = 1 task = 1 agent) · CODEOWNERS = owner on control plane + ⛔ globs · merged SHA = the SHA CI tested. <code>Done</code> in Jira is reachable ONLY via the transition recording the merge SHA — git is truth.
+    Authoring builder merges when ALL required checks are green. Branch protection: no force-push · no deletion · <b>enforce_admins ON</b> · squash-only (1 commit = 1 PR = 1 task = 1 agent) · CODEOWNERS = owner on control plane + ⛔ globs · merged SHA = the SHA CI tested. <code>Done</code> in Jira is reachable ONLY via the transition recording the merge SHA — git is truth. <b>★ v1.1 (GDF11-08):</b> &gt;1 ready PR merges FIFO; CI re-runs on the exact merged SHA after any rebase (native merge queue where available; fallback: require-branches-up-to-date + serialized auto-merge).
     <div class="stop"><b>Backpressure:</b> 5 unreviewed merges (or 1 unreviewed HIGH) → merges pause · owner silent 3 days → pause · PRs queue in <code>Awaiting-Owner</code>; work continues on branches.</div>
   </div>
 </div>
@@ -142,11 +143,11 @@
 <div class="stage s5">
   <div class="stage-head"><div class="stage-num">STAGE 5</div><div class="stage-title">Deploy / Verify — CI only</div><div class="stage-meta">agents trigger · CI holds ALL credentials</div></div>
   <div class="stage-body">
-    Trunk merge → auto-deploy to <b>staging</b> via CI. <b>Production:</b> tag + GitHub environment protection with the <b>owner as required reviewer</b> (the async lane's moment with teeth) → CI deploy → health check → CI-executed rollback on failure. Agents never hold SSH keys, registry passwords, or broad PATs — a CI check greps agent workspaces for secret patterns.
+    Trunk merge → auto-deploy to <b>staging</b> via CI. <b>Production:</b> tag + GitHub environment protection with the <b>owner as required reviewer</b> (the async lane's moment with teeth) → CI deploy → health check → CI-executed rollback on failure. Agents never hold SSH keys, registry passwords, or broad PATs — a CI check greps agent workspaces for secret patterns. <b>★ v1.1 (GDF11-09, by reference to the pinned GP v4.0 constitution):</b> scheduled-journey monitoring (named owner, flake/mute policy) + stack-conditional canary with REHEARSED rollback.
   </div>
 </div>
 
-<h2>3 · Roster (v1.0 minimal)</h2>
+<h2>3 · Roster (v1.1 — still the v1.0 minimal roster; specialists only on demonstrated need)</h2>
 <table>
   <tr><th>Role</th><th>Mode</th><th>Repo rights</th><th>Never</th></tr>
   <tr><td><b>PM Agent</b></td><td>standing orchestrator</td><td><b>READ-ONLY</b></td><td>commits · merges · bench verdicts · free-prose status (digest is script-generated with query strings)</td></tr>
@@ -190,7 +191,7 @@ churn (&lt;14-day rewrites) · cycle time (claim→merge) · QG first-pass rate&
 </div>
 
 <div class="foot">
-GDF v1.0 (PROVISIONAL) · chartered 2026-07-17 by owner directive OD-5 · shaped by a 7-seat technical design council ·
+GDF v1.1 (PROVISIONAL, unpiloted) · chartered 2026-07-17 (OD-5) · v1.1 hardening 2026-07-30 (GDF-008, 6-seat council) · shaped by a 7-seat technical design council ·
 decision trail: <code>decisions.md</code> (GDF-001..006) · constitution referenced from GP v3.3 (pinned) ·
 source patterns harvested from the SDLC handover (GP register, Increment 7)
 </div>

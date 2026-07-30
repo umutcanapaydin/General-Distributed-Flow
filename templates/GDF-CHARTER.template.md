@@ -22,4 +22,4 @@ becomes the core · the owner says so.
 - Jira project key: `<KEY>` · Repo: `<url>` · Toolchain profile: `<reference|custom>`
 - ⛔ globs for this repo (extends the constitution defaults): `<paths>`
 - Data stores + canonical schema file locations: `<...>`
-- Mode: **GDF v1.0 (PROVISIONAL)** · Charter date: `<date>`
+- Mode: **GDF v1.1 (PROVISIONAL)** · Charter date: `<date>`

@@ -18,6 +18,13 @@ OUT OF SCOPE: <explicitly>
 ⛔-ADJACENT: <yes/no — if yes, owner required review is automatic>
 ```
 
+## PR closure requirement (v1.1, GDF11-02 — dual evidence)
+
+The closing PR's description MUST carry the builder's **per-AC self-check evidence**, keyed to the
+AC-HASH above (`AC-1: <test ref / command output ref>` …). The bench marks each AC
+verified/failed **independently** in its verdict — the two artifacts are never merged, and the
+builder's self-check is **excluded from bench-seat inputs** (bench input scoping, GDF11-03).
+
 ## Rules
 - In-flight AC edits are escalate-class (blocked; open a successor task instead).
 - A task superseded more than twice → owner review (churn tripwire).
