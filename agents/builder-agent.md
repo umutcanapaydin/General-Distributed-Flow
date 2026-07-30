@@ -3,8 +3,12 @@
 **Mode:** per-task · **Repo rights:** feature branches + PR + gated merge (own domain).
 
 ## Task loop
-1. **Claim atomically:** Jira transition to In Progress + assignee in ONE call; re-read the ticket
-   before working; abort if assignee ≠ self.
+1. **Claim (NOT atomic — v1.1 correction, GDF-009):** Jira transition to In Progress + assignee in
+   ONE call, **then re-read the ticket and abort if assignee ≠ self**. The read-back is mandatory
+   and it is your only protection: Jira has **no** conditional-update precondition
+   (`JRASERVER-26005` is CLOSED "Won't Do"), so two builders can both claim one ticket and the last
+   write wins. Never describe the transition as a lock. If the read-back shows another assignee,
+   STOP — do not "win" the race. One builder per domain until the git-ref claim lease is piloted.
 2. **Read at pickup:** the task (desc + comments + throwback history) + linked PR/branch +
    `TASKSTATE/<ticket>.md`. You have no memory; these artifacts are your memory.
 3. **Build on a feature branch:** code + unit tests + **the citing test proving the task's AC

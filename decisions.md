@@ -171,3 +171,43 @@ GDF11-07 full state taxonomy → first unmapped PR state.
 waived, stale-reclaims, throwbacks, state-diverged, timeouts); an unread digest reduces the
 telemetry layer to theater (Quality); pilot must measure dual-evidence catch-rate vs cost before
 any further hardening.
+
+---
+
+## GDF-009 — The Jira "atomic claim" was false; claim discipline corrected (v1.1 defect fix)
+
+**Status:** ACTIVE (2026-07-30; GP Increment 11, architecture research + chair verification)
+
+**Defect:** `gdf-design.md` §4 and `agents/builder-agent.md` instructed builders that "the
+transition is the lock" and to "claim atomically … in ONE call". **Jira provides no such
+atomicity.** Chair fetched the primary source on 2026-07-30: `JRASERVER-26005` — *"As a program, I
+can opt into some form of optimistic locking when updating an issue via REST"* — is **CLOSED,
+resolution "Won't Do", resolved 2015-06-25**; the sibling Cloud ticket `JRACLOUD-26005` is also
+closed. The documented update idiom is GET→modify→PUT with no `If-Match`/version precondition.
+Consequence: two builders can both read "unassigned", both write their assignment, last write wins
+**silently** — duplicated spend and conflicting PRs, intermittent, the profile that hides for
+months. Found by architecture research (AI1 Card 3.9, which flagged itself as the report's weakest
+claim and asked for re-verification); **not** caught by the GDF design council, the market round, or
+the v1.1 council.
+
+**Decision:**
+1. The false claim is **struck from both files**. The mandatory read-back stays and is named as
+   what it is: a race-window narrower, not a lock. "If the read-back shows another assignee, STOP —
+   do not win the race."
+2. **Interim operating rule until the lease pilot passes: ONE builder per domain.** A claims-related
+   `state-diverged` flag is an escalate-NOW event.
+3. **Git-ref claim lease = PILOT (NOVEL, unvalidated).** `git push origin HEAD:refs/claims/<TICKET>`
+   is a genuine server-side compare-and-swap. Before it may be relied on: a two-racer test on the
+   real host · confirmation the host permits `refs/claims/*` and forbids force-push/delete there ·
+   `lease_expires_at` + a CI-only sweeper · `attempt_count` escalation.
+
+**Also repaired in the same change (Increment 11 Phase 0):** `scripts/gdf-check.sh` step 8
+**failed open** — `enabled: True` (capital T), `TRUE` or `yes` did not match the lowercase-only
+pattern, so the script printed "deploy disabled" and **skipped the owner-required-reviewer
+assertion (GDF-003, a declared non-negotiable)**. Now case-insensitive, value-parsed, and
+**fail-closed on anything unrecognised**; the dead `grep -qA3 … | grep -q …` line is gone.
+Regression-tested across `True|true|TRUE|yes|false|maybe`.
+
+**Rationale for the record:** both defects were live in an UNPILOTED flow — found by audit, not by
+production. This is the strongest available argument for the Increment-11 doctrine: *a declared
+control that silently passes is worse than an absent one.*

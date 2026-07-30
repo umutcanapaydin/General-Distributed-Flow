@@ -6,7 +6,7 @@
 > hardening, 6-seat GDF council — 8 adopts** (server-side AC invariants · dual evidence · bench
 > input scoping · recorded overrides + control telemetry · stale-approval dismissal · FIFO merge
 > serialization · deploy checks by GP-v4.0 reference · bench SLA fail-closed). Decision records:
-> `decisions.md` GDF-001 (charter) · GDF-007 (GP v4.0 constitution adoptions) · GDF-008 (v1.1).
+> `decisions.md` GDF-001 (charter) · GDF-007 (GP v4.0 adoptions) · GDF-008 (v1.1) · **GDF-009 (defect fix: Jira claim is NOT atomic; gdf-check fail-open repaired)**.
 > **Still UNPILOTED — the first pilot is the next evidence generator; pre-pilot rule additions are
 > frozen (Skeptic ceiling, GDF-008).**
 

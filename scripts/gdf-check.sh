@@ -37,12 +37,26 @@ if grep -qE 'provider:\s*"?sonarcloud' "$CFG"; then
 else ok "n/a (non-sonarcloud QG)"; fi
 
 say "[8] non-negotiables not disabled"
-grep -qE 'gitleaks:\s*true' "$CFG" && ok "gitleaks on" || bad "gitleaks must be true (not configurable)"
-grep -qE 'dependency_audit:\s*true' "$CFG" && ok "dependency audit on" || bad "dependency_audit must be true (not configurable)"
-if grep -qE 'enabled:\s*"?true' "$CFG" && grep -qA3 'production:' "$CFG" | grep -q 'required_reviewer' ; then :; fi
-if grep -qE '^\s*enabled:\s*"?true' "$CFG"; then
-  grep -qE 'required_reviewer:\s*"?owner' "$CFG" && ok "prod deploy owner-gated" || bad "production.required_reviewer must be owner (GDF-003)"
-else ok "deploy disabled — trunk is the end of the line"; fi
+grep -qiE '^[[:space:]]*gitleaks:[[:space:]]*"?(true|yes|on)"?[[:space:]]*(#.*)?$' "$CFG" && ok "gitleaks on" || bad "gitleaks must be true (not configurable)"
+grep -qiE '^[[:space:]]*dependency_audit:[[:space:]]*"?(true|yes|on)"?[[:space:]]*(#.*)?$' "$CFG" && ok "dependency audit on" || bad "dependency_audit must be true (not configurable)"
+# v1.1 Phase-0 repair (Increment 11): this block used to FAIL OPEN. `enabled: True` (capital T),
+# `TRUE` or `yes` did not match the old lowercase-only pattern, so the script printed
+# "deploy disabled" and SKIPPED the owner-required-reviewer assertion — a declared non-negotiable
+# (GDF-003) silently unchecked. It also carried dead code: `grep -qA3 ... | grep -q ...` pipes
+# nothing (-q suppresses output). Both fixed. Unrecognised values now FAIL CLOSED.
+DEPLOY_VAL="$(sed -n 's/^[[:space:]]*enabled:[[:space:]]*"\{0,1\}\([A-Za-z]*\)"\{0,1\}[[:space:]]*\(#.*\)\{0,1\}$/\1/p' "$CFG" | head -1 | tr 'A-Z' 'a-z')"
+case "$DEPLOY_VAL" in
+  true|yes|on)
+    grep -qiE '^[[:space:]]*required_reviewer:[[:space:]]*"?owner"?' "$CFG" \
+      && ok "prod deploy owner-gated (deploy enabled)" \
+      || bad "deploy is ENABLED but production.required_reviewer is not owner (GDF-003)" ;;
+  false|no|off)
+    ok "deploy disabled — trunk is the end of the line" ;;
+  "")
+    bad "deploy.enabled not found — fill it (true|false); an absent value is not a disabled deploy" ;;
+  *)
+    bad "deploy.enabled has an unrecognised value '$DEPLOY_VAL' — use true|false (fail-closed)" ;;
+esac
 
 say "[9] tracker-side invariants (v1.1, GDF11-01 — WARN only, never fails intake)"
 warn(){ say "  ⚠️  $*"; }

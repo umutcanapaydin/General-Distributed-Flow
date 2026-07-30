@@ -86,8 +86,23 @@ demonstrably needed one — recorded as a GDF ADR.
 
 ## 4. Coordination mechanics (the distributed-agent survival kit)
 
-- **Atomic claim:** claiming = Jira transition to In Progress + assignee set in one API call;
-  the transition is the lock; agent re-reads the ticket before working and aborts if assignee≠self.
+- **Claim (v1.1 CORRECTION — the tracker is NOT a lock, GDF-009):** claiming = Jira transition to
+  In Progress + assignee set in one API call, **then** a mandatory read-back: the agent re-reads the
+  ticket before working and aborts if assignee≠self. **This is NOT atomic and must not be described
+  as a lock.** Jira's documented update idiom is GET→modify→PUT with **no `If-Match`/version
+  precondition**: `JRASERVER-26005` ("opt into some form of optimistic locking when updating an
+  issue via REST") is **CLOSED, resolution "Won't Do", resolved 2015-06-25** (sibling
+  `JRACLOUD-26005` also closed) — Atlassian considered conditional update and declined it. Two
+  builders can therefore both read "unassigned" and both write; the read-back narrows the race
+  window but does not close it. Until the git-ref lease pilot lands (below), **run ONE builder per
+  domain** and treat a `state-diverged` flag on claims as an escalate-NOW event.
+- **Claim lease pilot (GDF-009, NOVEL — not yet validated by anyone's experience):**
+  `git push origin HEAD:refs/claims/<TICKET>` is a server-side compare-and-swap — ref creation
+  succeeds for exactly one pusher and fails for every other, with no coordination service. Pilot
+  requirements before it may be relied on: a **two-racer test** proving the behaviour on the actual
+  host, confirmation that the host permits `refs/claims/*` (and forbids force-push/delete there),
+  `lease_expires_at` + a CI-only sweeper (a claim without expiry turns a dead agent into a permanent
+  stall), and `attempt_count` escalation. The tracker remains the human-readable board.
 - **Stale-task sweep:** PM's poll force-returns any In Progress task with no comment/commit
   activity for T (default 45 min) to `To Do` (assignee cleared, `stale-reclaimed` label);
   idempotent resume from the last pushed commit.
