@@ -1,10 +1,17 @@
+---
+record_type: design
+id: gdf-constitution
+status: ratified
+process_version: v1.2
+requires: [gdf-decisions]
+---
 # GDF Constitution — inherited core + explicit overrides
 
 > **Model: REFERENCE, never copy** (Skeptic ruling, design council 2026-07-17). The constitution's
 > single source of truth is the General Pipeline repo; GDF records ONLY its deltas below.
 > **If the override appendix grows past one page, that is the drift alarm.**
 
-## 1. Inherited core (binding, unchanged — pinned to **GP v4.0** as of GDF v1.1)
+## 1. Inherited core (binding, unchanged — pinned to **GP v4.2** as of GDF v1.2)
 
 Source: `github.com/SADCAIVibe/General_Pipeline` → `general_pipeline_v4.0/` (re-pinned
 deliberately at the v1.1 cut per GDF-007/GDF-008; charters signed before 2026-07-30 keep their

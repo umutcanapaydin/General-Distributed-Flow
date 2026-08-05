@@ -1,0 +1,8 @@
+# GDF's governed record set (consumed by scripts/check_records.py governed_records()).
+# GDF is a DIFFERENT repo with a different record set; this manifest is why it can run GP's
+# validator byte-for-byte instead of a forked near-copy that drifts.
+decisions.md
+GDF-CONSTITUTION.md
+gdf-design.md
+permission-matrix.md
+pr-bench.md

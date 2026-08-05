@@ -1,4 +1,11 @@
-# GDF PR Bench — the risk-tiered technical review gate (v1.1)
+---
+record_type: design
+id: gdf-pr-bench
+status: ratified
+process_version: v1.2
+requires: [gdf-design]
+---
+# GDF PR Bench — the risk-tiered technical review gate (v1.2)
 
 > Every PR passes a bench of fresh-eyes agent reviewers (never the author). Verdicts are
 > **GitHub PR reviews** in structured format — platform artifacts, timestamped, per-seat

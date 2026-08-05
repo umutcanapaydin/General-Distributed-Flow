@@ -1,3 +1,10 @@
+---
+record_type: design
+id: gdf-permission-matrix
+status: ratified
+process_version: v1.2
+requires: [gdf-constitution]
+---
 # GDF Permission Matrix (default-deny)
 
 ## 1. Git operations ownership

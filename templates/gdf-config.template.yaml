@@ -3,13 +3,15 @@
 # <FILL> value at intake; NO work starts until `scripts/gdf-check.sh` passes on this file.
 #
 # ⚠️ RULE: NO secret VALUES in this file, ever — only the NAMES of CI secrets that must exist.
-#    gdf-check greps this file for secret patterns and FAILS on hit.
+#    gdf-check step 3 checks the VALUE and excludes on the KEY, so a trailing comment cannot
+#    launder a credential (that was the v1.1 defect, GDF-010). Regression-fixtured:
+#    scripts/gdf-selftest.sh.
 
 project:
   name: "<FILL>"
   intent: "<FILL — 1-3 sentences, fuzzy is fine>"
   charter_signed: false            # flips true only after the owner signs GDF-CHARTER.md
-  gdf_version: "1.1"
+  gdf_version: "1.2"
 
 tracker:                           # task/message bus
   provider: "jira"                 # jira | github-issues

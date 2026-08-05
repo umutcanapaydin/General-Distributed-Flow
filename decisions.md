@@ -1,3 +1,9 @@
+---
+record_type: design
+id: gdf-decisions
+status: ratified
+process_version: v1.2
+---
 # GDF Decision Log (ADRs — append-only; supersede, never edit)
 
 ## GDF-001 — Charter: agents perform git operations including merges (OWNER OVERRIDE, recorded honestly)
@@ -167,6 +173,12 @@ GDF11-07 full state taxonomy → first unmapped PR state.
    has not started by the next council, this seat moves to REJECT-by-default on all further
    pre-pilot candidates."
 
+> **Reading note added at v1.2 (GDF-012), because the chair had been mis-citing this.** Dissent 2 is
+> **one seat's declared future voting posture**, not a ratified council-wide freeze with its own id.
+> It has repeatedly been summarised as "GDF-008 froze pre-pilot rule additions." It did not. The
+> practical effect is the same and the seat's position is sound — but the citation must be accurate.
+> Flagged independently by the Software, Quality and Skeptic seats at GP Increment 12.
+
 **Standing concerns logged:** the digest must stay scannable (SRE — it now carries overrides,
 waived, stale-reclaims, throwbacks, state-diverged, timeouts); an unread digest reduces the
 telemetry layer to theater (Quality); pilot must measure dual-evidence catch-rate vs cost before
@@ -211,3 +223,186 @@ Regression-tested across `True|true|TRUE|yes|false|maybe`.
 **Rationale for the record:** both defects were live in an UNPILOTED flow — found by audit, not by
 production. This is the strongest available argument for the Increment-11 doctrine: *a declared
 control that silently passes is worse than an absent one.*
+
+---
+
+## GDF-010 — Step 3 of the intake gate was FAIL-OPEN on the first-named non-negotiable (2026-08-05)
+
+**Found by:** the **Security seat** of GP's Increment-12 scoped council, which was asked to hunt for
+"the same fail-open shape in the OTHER steps" after step 8 was repaired at v1.1. It found one, and
+reproduced it.
+
+**The defect.** `scripts/gdf-check.sh` step 3 enforces the constitution's first-named
+non-negotiable — *NO secret VALUES in this config, names only.* The detector piped its matches
+through `grep -vi 'required\|_name\|<FILL'`, and that exclusion matched **the whole line**. So one
+innocuous word in a trailing comment laundered a live credential:
+
+```
+api_key: "AKIAIOSFODNN7EXAMPLE"  # required for staging deploy      →  NOT FLAGGED
+```
+
+`templates/gdf-config.template.yaml` told operators *"gdf-check greps this file for secret patterns
+and FAILS on hit."* That claim was false under an entirely ordinary input.
+
+**It was worse than reported.** Verifying the seat's finding, the chair found the pattern list never
+covered `access_key`, `private_key` or `credential` **at all** — so `deploy_access_key = AKIA…` was
+missed by a second, independent route. Two misses, not one.
+
+**Repair.** Match on the **VALUE**, exclude on the **KEY**. Comment text can no longer influence the
+verdict. Placeholders (`<FILL`, `${…}`, `changeme`) and name-suffixed keys (`*_name`, `*_ref`,
+`*_env`, `*_var`, `*_id`) stay legitimately exempt, because naming a secret is the entire purpose of
+the file. Private-key detection widened to DSA and PGP.
+
+**Class.** Identical to GDF-009: *an unanticipated input silently treated as benign.* Two of eight
+steps of this gate have now been found fail-open by seats reading the code. Neither was found by its
+author. This is GP's Cluster A (`council-telemetry.md` §6.1) arriving in GDF from a third dataset.
+
+## GDF-011 — The intake gate gets a regression harness that runs the REAL gate (2026-08-05)
+
+**Condition set by the Security seat** (*"a committed conformance fixture directory for GDF before
+GDF's first pilot begins"*) and independently by the **PM seat** (*"a conformance/negative-fixture set
++ self-test for GDF's new checks, mirroring V4C-32, before GDF-side CI is declared trustworthy"*).
+**Closed at this cut rather than at pilot start.**
+
+`scripts/gdf-selftest.sh` + `conformance/secret-values/` + `conformance/non-negotiables/`.
+
+Governing rule, GP **V4C-50**: *a suite that bypasses the layer where the bug lives is correctly
+green and completely uninformative.* So the harness invokes **`gdf-check.sh` itself** against each
+fixture and asserts on that step's own verdict line. It does not re-implement a single pattern — a
+re-implementation would certify the copy and not the control.
+
+Five fixtures, each declaring its expectation on its first line:
+
+| Fixture | Asserts |
+|---|---|
+| `secret-values/laundered-by-comment.yaml` | step 3 **FLAGS** the GDF-010 defect input |
+| `secret-values/uncovered-key-pattern.yaml` | step 3 **FLAGS** `access_key`, the second miss |
+| `secret-values/clean-names-only.yaml` | step 3 stays **CLEAN** on names, `${env}`, `<FILL>` and prose mentioning `api_key` — a gate that cries wolf gets bypassed |
+| `non-negotiables/deploy-enabled-capital-true.yaml` | step 8 **FLAGS** the GDF-009 defect input |
+| `non-negotiables/deploy-enabled-garbage.yaml` | step 8 **FAILS CLOSED** on an unrecognised boolean |
+
+**Falsification run, and this is the part that matters:** with step 3 reverted to its v1.1 form the
+harness **exits 1 and names both missed inputs**. With the repair in place it exits 0. The harness is
+not a no-op, and that was demonstrated rather than asserted — which is the specific failure
+(`council-telemetry.md` TB-008) this council caught the chair committing on the same day.
+
+## GDF-012 — v1.2: enforcement installed, ZERO rules added (2026-08-05)
+
+**Owner directive OD-8** (recorded verbatim in GP `v4-candidate-register.md` §12.5): cut a new GDF
+version now, carrying current rules and repairs, before the next project starts. Version label
+corrected by the chair from the owner's casual `1.2.1` to **v1.2** — under GP V4C-11's semver
+semantics a PATCH cannot precede the MINOR it patches. Council concurred 6/6.
+
+**The freeze is respected, and the freeze is also described more accurately than before.** Three
+seats (Software, Quality, Skeptic) flagged that the chair had been characterising GDF-008 as *"a
+ratified freeze on pre-pilot rule additions."* It is not. What the tree actually contains is a
+**Skeptic dissent stating future voting intent** — *"if the pilot has not started by the next
+council, this seat moves to REJECT-by-default on all further pre-pilot candidates"* — which is one
+seat's declared posture, not a council-wide rule with an id. **Corrected here so the compression does
+not become a citation error two cuts from now.** The practical effect is the same: no rules were
+added at v1.2, and none should be.
+
+**What v1.2 installs — all of it enforcement for already-ratified rules:**
+
+| Artifact | Closes |
+|---|---|
+| `.github/workflows/governance-contract.yml` | GDF had **no `.github` directory at all**. OVR-1 grants agents merge authority "bounded by required status checks" that did not exist. Six unconditional steps. |
+| `.github/CODEOWNERS` | the paths that bound agent authority must not be agent-editable |
+| `scripts/check_records.py` + `schemas/record.schema.json` | byte-identical to GP's live copy, run against GDF's own record set via `.governed-records` — **not a fork**, because a near-copy drifts |
+| `.governed-records` | the manifest that makes the unforked copy possible |
+| frontmatter on `decisions.md`, `GDF-CONSTITUTION.md`, `gdf-design.md`, `permission-matrix.md`, `pr-bench.md` | the Skeptic predicted this retrofit would be required; it was, and it is done |
+| `scripts/gdf-selftest.sh` + `conformance/` | GDF-011 |
+| step 3 repair | GDF-010 |
+
+**Still UNPILOTED, and v1.2 changes nothing about that.** The open conditions all need a pilot to
+close: the Jira invariant config evidence, branch-protection evidence, the **V4C-10 injection-defense
+exercise** (a blocking precondition for scale-out), the **V4C-48 git-ref claim-lease two-racer test**,
+and credential enforcement at pilot exit. **The next GDF version number should be earned by pilot
+evidence, not by more rules.**
+
+**Owner action still required, outside the repo — until it is done the gate is Tier 2, advisory:**
+make `governance-contract` a required status check on the protected branch, bind it to the app,
+disable bypass, and CODEOWNER-protect `.github/`.
+
+## GDF-013 — One detector, because two copies of a security check is one too many (2026-08-05)
+
+**Found by:** the **Skeptic seat** on re-poll, hours after GDF-010 was recorded. Verbatim:
+
+> *"the newest security surface — GDF's first CI file — reintroduces the exact comment-laundering
+> shape of GDF-010 in a different location in the same cut."*
+
+It constructed `prod_api_key: "F1XTURE0DEMO0VALUE0NOTREAL1234"  # env_name reference` and the new CI
+step passed it silently, because that step had its own inline `grep -vE '…_name…'` excluding on the
+**whole line** — the identical defect GDF-010 had just fixed thirty lines away in another file.
+
+**Plus two live bypasses in the repaired step 3 itself, both constructed by the same seat:**
+
+1. **Placeholder-prefix laundering** — the placeholder exemption was anchored at the *start* of the
+   value, so `some_api_key: "changeme_F1XTURE0DEMO0NOTREAL0VALUE"` passed clean. A placeholder must
+   be the **whole** value.
+2. **Untracked key names** — `webhook_signing_key` and `bearer` were not in the allowlist. Any key
+   ending in `key` now counts, plus `bearer`, `signing_key`, `encryption_key`, `auth`.
+
+**Repair:** `scripts/scan-secret-values.sh` — **one** implementation, sourced by `gdf-check.sh`
+step 3 **and** the CI step. Two more fixtures (`placeholder-prefix-laundering.yaml`,
+`untracked-key-names.yaml`), seven total.
+
+**Two further bugs surfaced while fixing this, both caught by running the harness rather than reading
+the code** — which is the whole argument for GDF-011 existing:
+
+- The narrowed detector exempted bare `SCREAMING_SNAKE` values as CI-secret names — and an AWS key
+  is *also* uppercase alphanumeric, so `AKIAIOSFODNN7EXAMPLE` became exempt and **silently un-fixed
+  both GDF-010 fixtures**. A secret *name* has an underscore; a raw credential does not.
+- The comment-strip guard *"skip the strip if the value is an open quoted string"* matched **any**
+  quoted value followed by a comment, so the comment survived into the value and the line was then
+  discarded as prose. Latent behind the old code path; exposed the moment a prose filter was added.
+
+**The claim, stated precisely, because the seat insisted on the distinction and it is right:**
+this is a **config-hygiene heuristic**, not a secret scanner. `gitleaks` is the secret scanner and it
+is a non-negotiable. **"Zero false positives" is not "cannot be bypassed."** A complete detector is
+**refused by decision** — a second half-good scanner invites trusting the wrong one.
+
+**Falsification run:** reverting `scan-secret-values.sh` to its v1.1 form makes the harness exit 1 and
+name three failing fixtures. The harness is not a no-op, demonstrated rather than asserted.
+
+## GDF-014 — A security fixture must never be shaped like a real credential (2026-08-05)
+
+**Found by:** **GitHub push protection**, which rejected the entire v1.2 push. Not a council, not a
+reviewer — a machine at the far end of the pipe, after everything local was green.
+
+```
+remote: - GITHUB PUSH PROTECTION
+remote:     —— Slack API Token ——
+remote:        - .secret-scan-allow:16
+remote:        - conformance/secret-values/untracked-key-names.yaml:70
+remote: ! [remote rejected] main -> main (push declined due to repository rule violations)
+```
+
+**What happened.** The GDF-013 fixtures used realistic provider signatures — `xoxb-…`, `whsec_…`,
+`AKIA…` — on the reasoning that a realistic value is a better test. Every local check passed: the
+harness, the shared detector, both simulated CI runs. Then the remote refused the push.
+
+**GitHub was right, and the reason matters more than the inconvenience.** A fixture shaped like a
+live credential trips every downstream scanner — GitHub's, `gitleaks`, the vendor's own revocation
+bots. The only way to ship it is to click *"allow this secret."* **That habit is precisely what leaks
+the real ones.** The rule now:
+
+> **A security fixture must be long, high-entropy and UNMISTAKABLY FAKE.** Detection in
+> `scan-secret-values.sh` depends on the **key name, the value length and the value shape** — never
+> on a provider prefix. Nothing is lost by removing the signature, and a whole class of downstream
+> false alarms goes with it. Fixtures carry an `F1XTURE`/`f1xture` marker.
+
+All five secret-value fixtures were rewritten; the harness still catches all of them and still fails
+when the detector is reverted. The one provider-shaped literal remaining in this repo is
+`AKIAIOSFODNN7EXAMPLE` — the AWS-published documentation key, which every scanner already recognises
+as a sample, quoted in GDF-010 as the exact input that was laundered.
+
+**Where this belongs in the pattern.** `council-telemetry.md` Cluster A is *a control ratified
+without a fixture proving it fires.* GDF-014 is its neighbour: **a fixture written without asking
+what else reads it.** Both are the same root — the author reasons about their own artifact and not
+about the system it lands in. That is F45's claim (*a lesson does not transfer between artifacts by
+itself*) and V4C-49's remedy, arriving for the fourth time in one day, from the fourth independent
+observer, this one not even human.
+
+**`found_by` for the record: an external machine, after six seats, one re-poll and a zero-context
+human reviewer had all signed off.**

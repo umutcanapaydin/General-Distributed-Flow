@@ -1,0 +1,62 @@
+# expect: 8 FLAG
+# Fail-closed: an unrecognised value for deploy.enabled must FAIL, never be read as false.
+project:
+  name: "fixture"
+  intent: "regression fixture — not a real project"
+  charter_signed: true
+  gdf_version: "1.2"
+tracker:
+  provider: "jira"
+  jira:
+    site_url: "https://fixture.atlassian.net"
+    project_key: "FIX"
+    board_type: "scrum"
+    approved_label: "gdf-approved"
+  invariants:
+    ac_required_at_creation: true
+    assignee_only_transitions: true
+  statuses:
+    todo: "To Do"
+    in_progress: "In Progress"
+    in_review: "In Review"
+    done: "Done"
+    blocked_human: "Blocked-Human"
+    awaiting_owner: "Awaiting-Owner"
+git:
+  provider: "github"
+  owner: "fixture-owner"
+  repo: "fixture-repo"
+  trunk: "main"
+  merge_method: "squash"
+  machine_account: "gdf-bot"
+  required_trailers: ["GDF-Agent", "GDF-Task", "GDF-Run"]
+  protected_branches_configured: true
+quality_gate:
+  provider: "ci-native"
+  thresholds:
+    coverage_min: 80
+    duplication_max: 3
+    ratings: "A"
+security_scans:
+  gitleaks: true
+  dependency_audit: true
+  semgrep: "false"
+artifact_store:
+  provider: "none"
+deploy:
+  enabled: maybe
+  environments:
+    staging:
+      auto_deploy_on_trunk: true
+    production:
+      via: "tag + environment protection"
+      required_reviewer: "owner"
+  target: "none"
+zones:
+  blocked_globs:
+    - "**/auth/**"
+  pii_columns_registry: "n/a"
+limits:
+  pr_diff_cap_loc: 600
+ci_secrets_required:
+  - "SONAR_TOKEN"

@@ -1,12 +1,12 @@
 # GDF — General Distributed Flow
 
-> **Status: v1.1 DRAFT — PROVISIONAL charter** (expires after 3 projects or 60 days of field use,
+> **Status: v1.2 DRAFT — PROVISIONAL charter · STILL UNPILOTED** (expires after 3 projects or 60 days of field use,
 > whichever first → mandatory retrospective before re-charter). Chartered by owner directive OD-5
-> (2026-07-17), shaped by a 7-seat technical design council; **v1.1 (2026-07-30): market-informed
+> (2026-07-17), shaped by a 7-seat technical design council; **v1.2 (2026-08-05, GDF-012): enforcement installed, ZERO rules added — first CI ever, unforked GP validator, intake-gate regression harness, step-3 fail-open repaired**; **v1.1 (2026-07-30): market-informed
 > hardening, 6-seat GDF council — 8 adopts** (server-side AC invariants · dual evidence · bench
 > input scoping · recorded overrides + control telemetry · stale-approval dismissal · FIFO merge
 > serialization · deploy checks by GP-v4.0 reference · bench SLA fail-closed). Decision records:
-> `decisions.md` GDF-001 (charter) · GDF-007 (GP v4.0 adoptions) · GDF-008 (v1.1) · **GDF-009 (defect fix: Jira claim is NOT atomic; gdf-check fail-open repaired)**.
+> `decisions.md` GDF-001 (charter) · GDF-007 (GP v4.0 adoptions) · GDF-008 (v1.1) · **GDF-009 (defect fix: Jira claim is NOT atomic; gdf-check step-8 fail-open repaired)** · **GDF-010 (step-3 fail-open on the secret-value non-negotiable)** · **GDF-011 (intake-gate regression harness that runs the REAL gate)** · **GDF-012 (v1.2 — enforcement installed, zero rules)**.
 > **Still UNPILOTED — the first pilot is the next evidence generator; pre-pilot rule additions are
 > frozen (Skeptic ceiling, GDF-008).**
 
@@ -26,7 +26,7 @@ GDF is the sibling of **General Pipeline (GP)** — one constitution, two flows:
 | Git | owner-only | agents commit, open PRs, **merge** (gated) |
 | Spec | PRD + hash-frozen milestone plans | rolling backlog; per-TASK acceptance criteria, hash-frozen at Jira level |
 | Use when | PRD/features are clear; production-critical; ⛔ surfaces | **PRD NOT yet clear; speed matters; non-production-critical projects** |
-| Versioning | v4.0 (own lineage) | v1.1 (own lineage, independent) |
+| Versioning | v4.2 (own lineage) | v1.2 (own lineage, independent) |
 
 ## Eligibility (hard rule — see GDF-CHARTER template)
 

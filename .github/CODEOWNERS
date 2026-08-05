@@ -1,0 +1,20 @@
+# CODEOWNERS — GDF repo root (v1.2, GDF-012).
+# The workflow states its own path must be protected: a validator a PR can weaken in the same PR is
+# not a validator. GDF's OVR-1 grants AGENTS merge authority to protected branches — so the paths
+# that BOUND that authority are the ones that must never be agent-editable.
+# An unfilled CODEOWNERS silently protects nothing; every entry names a real account.
+
+*                             @umutcanapaydin
+
+# The enforcement surface — the paths an agent could use to disarm its own bounds.
+/.github/                     @umutcanapaydin
+/.governed-records            @umutcanapaydin
+/scripts/                     @umutcanapaydin
+/schemas/                     @umutcanapaydin
+/conformance/                 @umutcanapaydin
+/.secret-scan-allow           @umutcanapaydin   # a bypass surface: adding a literal is a security decision
+
+# The constitution and the decision trail.
+/GDF-CONSTITUTION.md          @umutcanapaydin
+/decisions.md                 @umutcanapaydin
+/permission-matrix.md         @umutcanapaydin

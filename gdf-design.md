@@ -1,8 +1,20 @@
-# GDF v1.1 — Flow Design
+---
+record_type: design
+id: gdf-design
+status: ratified
+process_version: v1.2
+requires: [gdf-constitution]
+---
+# GDF v1.2 — Flow Design
 
 > Minimal by ruling (Skeptic cut list): small roster, one lightweight shaping gate, cheap to
 > falsify. Everything here derives from the 7-seat design council (2026-07-17); source patterns
 > harvested from the SDLC handover are credited in GP register Increment 7.
+> **v1.2 (2026-08-05, GDF-010/011/012):** no flow change. Enforcement installed for rules that
+> already existed: first CI, the unforked GP record validator, a regression harness that runs the
+> real intake gate, and a repair to gdf-check step 3 (secret VALUES were laundered by a trailing
+> comment). **Still UNPILOTED — the next version number is earned by pilot evidence, not rules.**
+>
 > **v1.1 (2026-07-30, GDF-008):** market-informed hardening — 8 adopts from the three-AI market
 > cross-check (server-side AC invariants · dual evidence · bench input scoping · recorded
 > overrides + control telemetry · stale-approval dismissal + re-review-on-push · FIFO merge

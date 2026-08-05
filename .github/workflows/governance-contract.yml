@@ -1,0 +1,103 @@
+# Governance contract — GDF's FIRST CI, ever (GDF-012, v1.2).
+#
+# WHY THIS FILE EXISTS. Until v1.2 this repository had **no `.github` directory at all**. Confirmed
+# independently by four seats at GP's Increment 12. That is not a cosmetic gap:
+#
+#   * GDF's ratified OVR-1 (`GDF-CONSTITUTION.md` §1) grants AGENTS merge authority to protected
+#     branches, "bounded by required status checks." There were no status checks. The bounding
+#     condition of an already-ratified autonomy grant did not mechanically exist.
+#   * Two steps of the intake gate `scripts/gdf-check.sh` were found FAIL-OPEN by councils reading
+#     the code — step 8 (GDF-009, `enabled: True` skipped a declared non-negotiable) and step 3
+#     (GDF-010, a trailing comment word laundered a live credential). Both repairs were verified by
+#     hand and left NO artifact, so a regression would have been silent.
+#
+# v1.2 ADDS ZERO RULES. GDF is still UNPILOTED and pre-pilot rule additions are frozen. Everything
+# here installs enforcement for rules that were already ratified. Installing enforcement is the
+# opposite of adding a rule — it is the thing the rules were always claimed to have.
+#
+# GATE SEMANTICS — inherited verbatim from GP V4C-34, and they are the whole point:
+#   * ONE UNCONDITIONAL job. Never conditional, never `continue-on-error`. GitHub reports a SKIPPED
+#     required job as SUCCESS; that false pass is exactly what this job exists to remove.
+#   * Owner action required once, OUTSIDE this file: make `governance-contract` a REQUIRED status
+#     check on the protected branch, bind it to the intended app, disable bypass, and CODEOWNER the
+#     `.github/` path. **Until then this file is advisory and the gate is NOT in force.**
+#   * A validator a PR can weaken in the same PR is not a validator.
+#
+# COST LINE (V4C-13): every push/PR to the default branch; ~20-40 s; bypass = admin merge or owner
+# override, which is a first-class EXPERIENCE finding, not a footnote.
+name: governance-contract
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance-contract:
+    name: governance-contract (aggregate, unconditional)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8  # v5.0.0 — SHA-pinned (V4C-44)
+
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0 — SHA-pinned
+        with:
+          python-version: '3.12'
+
+      # The self-test runs FIRST (V4C-32). It proves the validator is not a silent no-op before any
+      # of its verdicts are trusted. A council found a ratified GP gate that had never executed once.
+      - name: Validator self-test (conformance fixtures must fail with their declared diagnostics)
+        run: python3 scripts/check_records.py --self-test
+
+      # GDF-011 — the intake gate's own regression harness. Runs the REAL gdf-check.sh against
+      # fixtures, never a re-implementation of its patterns: a suite that bypasses the layer where
+      # the bug lives is correctly green and completely uninformative (GP V4C-50).
+      - name: Intake-gate self-test (gdf-check.sh must FIRE on the known fail-open inputs)
+        run: bash scripts/gdf-selftest.sh
+
+      # R1-R3 / X1-X3 / P1 / N1 / C1 over the record set named in `.governed-records`.
+      - name: Validate governance records
+        run: python3 scripts/check_records.py
+
+      - name: gdf-check.sh is syntactically valid (it shipped a syntax error once, in GP's Makefile)
+        run: bash -n scripts/gdf-check.sh && bash -n scripts/gdf-selftest.sh
+
+      # GDF's constitution pins itself to a GP version. A pin that is really /blob/main/ tracks HEAD
+      # and the pin discipline is a fiction. This is the one check GDF needs more than GP does.
+      - name: No fake pins (the GP constitution pin is load-bearing here)
+        run: |
+          if grep -rInE 'https?://[^ ]*/blob/(main|master)/' \
+               --include='*.md' --include='*.yml' --include='*.yaml' \
+               . --exclude-dir=conformance \
+             | grep -iE 'pin|constitution'; then
+            echo "FAIL [N1]: a /blob/main/ URL is presented as a pin — it tracks HEAD. Use a commit SHA."
+            exit 1
+          fi
+          echo "OK: no fake pins on the governance surface"
+
+      # Standing non-negotiable: NO secret VALUES anywhere, names only.
+      # GDF-013: this step originally inlined its OWN grep and reintroduced GDF-010's exact
+      # comment-laundering defect in the same cut that fixed it — found by the Skeptic seat with
+      # `prod_api_key: "AKIA..."  # env_name reference`, which it silently passed. There is now
+      # exactly ONE detector, shared with gdf-check.sh step 3, and it is fixtured.
+      - name: No secret values committed (shared detector, GDF-013)
+        run: |
+          mapfile -t FILES < <(git ls-files '*.yaml' '*.yml' '*.md' '*.sh' '*.json' '*.py' \
+                               | grep -v '^conformance/')
+          set +e; HITS="$(bash scripts/scan-secret-values.sh "${FILES[@]}")"; RC=$?; set -e
+          # Fail CLOSED if the scanner could not run: empty output is not evidence of cleanliness.
+          if [ "$RC" -ge 2 ]; then
+            echo "FAIL: secret scanner could not run (rc=$RC) — treated as a hit."
+            exit 1
+          fi
+          if [ -n "$HITS" ]; then
+            echo "FAIL: a secret VALUE appears to be committed. Keep NAMES only."
+            printf '%s\n' "$HITS"
+            exit 1
+          fi
+          echo "OK: no secret values detected across $(( ${#FILES[@]} )) tracked files"
