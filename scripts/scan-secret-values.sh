@@ -27,19 +27,33 @@
 # as "no secrets found". **A crashed detector that reports clean is the fail-open, one level up.**
 #   0 = ran, nothing found · 1 = ran, suspected secret VALUE(s) printed · 2 = could not run
 set -u
-set -o pipefail
-trap 'echo "scan-secret-values: INTERNAL ERROR — treat as FAIL, not as clean" >&2; exit 2' ERR
+# NOTE: no `trap ... ERR` and no `pipefail` here, deliberately. The first version had both, and the
+# ERR trap fired on awk's INTENTIONAL exit 1 ("hits found"), converting every real detection into a
+# fake "INTERNAL ERROR / exit 2". A blanket trap cannot tell an expected non-zero from a crash.
+# The explicit `case $?` at the bottom of the loop does exactly that, precisely.
 
 # The allowlist: exact literals that appear in documentation. See .secret-scan-allow.
+#
+# GDF-015 — macOS. This used to be `awk -v ALLOW="$ALLOW"` with a MULTI-LINE value. GNU awk (Linux,
+# GitHub runners) accepts that. **BSD awk, which is what macOS ships, rejects it** —
+# `awk: newline in string ... at source line 1` — so on the owner's own machine the scanner CRASHED,
+# printed nothing, and gdf-check read "nothing" as "clean". A fail-open that existed only on the one
+# platform never tested. Found by `gdf-selftest.sh` the first time it ran on a Mac.
+# Fix: awk reads the allowlist FROM THE FILE. No multi-line variable crosses the boundary.
 ALLOW_FILE="$(dirname "$0")/../.secret-scan-allow"
-ALLOW=""
-[ -f "$ALLOW_FILE" ] && ALLOW="$(sed 's/[[:space:]]*#.*$//' "$ALLOW_FILE" | grep -v '^[[:space:]]*$' || true)"
+[ -f "$ALLOW_FILE" ] || ALLOW_FILE="/dev/null"
 
 RC=0
 for f in "$@"; do
   [ -f "$f" ] || continue
-  awk -v FNAME="$f" -v ALLOW="$ALLOW" '
-    BEGIN { n = split(ALLOW, A, "\n"); for (i = 1; i <= n; i++) { gsub(/^[ \t]+|[ \t]+$/, "", A[i]); if (A[i] != "") ALLOWED[A[i]] = 1 } }
+  awk -v FNAME="$f" -v ALLOWFILE="$ALLOW_FILE" '
+    BEGIN {
+      while ((getline ln < ALLOWFILE) > 0) {
+        sub(/[ \t]*#.*$/, "", ln); gsub(/^[ \t]+|[ \t]+$/, "", ln)
+        if (ln != "") ALLOWED[ln] = 1
+      }
+      close(ALLOWFILE)
+    }
     {
       # A comment line is not an assignment. Without this the scanner flags its own documentation:
       # `decisions.md` and `gdf-check.sh` both quote the GDF-010 defect input verbatim, using the
@@ -116,6 +130,12 @@ for f in "$@"; do
       printf "%s:%d:%s\n", FNAME, NR, $0
       hits++
     }
-    END { exit (hits ? 1 : 0) }' "$f" || RC=1
+    END { exit (hits ? 1 : 0) }' "$f"
+  case $? in
+    0) ;;                                   # clean
+    1) RC=1 ;;                              # hits found — printed above
+    *) echo "scan-secret-values: awk failed on $f — treat as FAIL, not as clean" >&2
+       exit 2 ;;                            # GDF-015: `|| RC=1` used to swallow a crash as "hits",
+  esac                                      # and an empty hit list then read as clean upstream.
 done
 exit "${RC:-0}"

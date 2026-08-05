@@ -406,3 +406,47 @@ observer, this one not even human.
 
 **`found_by` for the record: an external machine, after six seats, one re-poll and a zero-context
 human reviewer had all signed off.**
+
+## GDF-015 — The detector crashed on macOS and reported clean (2026-08-05)
+
+**Found by:** the **owner**, running `gdf-selftest.sh` on his own Mac for the first time. Everything
+had passed in the Linux sandbox and would have passed on GitHub's Ubuntu runners.
+
+```
+does the password-catcher still fire?    FAIL
+      awk: newline in string AKIAIOSFODNN7EXAMPLE... at source line 1
+        ✅ no secret values detected
+```
+
+**The defect.** `scan-secret-values.sh` passed the allowlist to awk as a **multi-line `-v` variable**.
+GNU awk accepts that. **BSD awk — which is what macOS ships — rejects it.** So on the owner's machine
+the detector died on startup, printed nothing, and `gdf-check.sh` read an empty result as *"no secret
+values detected."*
+
+**A fail-open that existed only on the platform never tested.** Linux: fine. CI: fine. The one machine
+that actually matters: silently blind. This is V4C-50's rule (*test through the real entry point*) with
+a second edge nobody had named — **the real entry point includes the real operating system.**
+
+**A second, self-inflicted defect found while fixing the first.** The scanner carried
+`trap '…exit 2' ERR`, added hours earlier to fail closed on a crash. But awk exits **1** on purpose
+when it finds hits — a non-zero return — so the trap fired on every real detection and converted it
+into a fake `INTERNAL ERROR`. **A blanket ERR trap cannot distinguish an expected non-zero from a
+crash.** Removed; the explicit `case $?` (0 clean · 1 hits · anything else → exit 2) does the job
+precisely, and that is now stated in the file.
+
+**Repairs**
+
+| | |
+|---|---|
+| awk reads the allowlist **from the file** via `getline`; no multi-line value crosses the boundary | portable to BSD, GNU, mawk and busybox awk |
+| `case $?` replaces the ERR trap | a crash is rc=2 and fails closed; a hit is rc=1 and is reported |
+| **PREFLIGHT in `gdf-selftest.sh`** | *"can the detector run on this machine at all?"* is now its own loud first check. It plants an obvious secret, requires rc=1, and on failure prints the awk dialect and says **PLATFORM failure, not fixture failure** |
+
+**Verified across three awk dialects** (GNU 5.1, mawk, busybox), 8 checks each, plus: planted secret →
+rc=1; clean file → rc=0; awk made unavailable → **rc=2, fails closed**. BSD awk itself is confirmed by
+the owner re-running on the Mac — that is the only machine that can prove it.
+
+**Why the preflight matters more than the fix.** The symptom the owner saw was *"a fixture didn't
+fire"*, which points at the fixture. The cause was *"the tool cannot start here"*. Three minutes were
+spent looking in the wrong place. A control that fails for an environmental reason must say so in the
+environmental language, not in the language of the thing it was testing.

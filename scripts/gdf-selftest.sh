@@ -25,6 +25,29 @@ BAD=0
 [ -x "$CHECK" ] || { echo "self-test FAIL: $CHECK not executable"; exit 1; }
 [ -d "$CONF" ]  || { echo "self-test FAIL: conformance/ missing"; exit 1; }
 
+# ── PREFLIGHT (GDF-015): can the detector RUN on this machine at all? ──────────────────────────
+# Added after the harness's first run on macOS. The scanner used `awk -v` with a multi-line value:
+# legal in GNU awk (Linux, CI), rejected by BSD awk (macOS). It crashed, printed nothing, and the
+# caller read nothing as clean. The fixture mismatch that followed was a CONFUSING symptom of a
+# PLATFORM failure. "The detector cannot run here" now fails on its own terms, first, and loudly.
+SCAN="$HERE/scan-secret-values.sh"
+if [ -f "$SCAN" ]; then
+  _pf="$(mktemp)"; printf 'probe_api_key: "F1XTUREPREFLIGHT0NOTREAL99"\n' > "$_pf"
+  _out="$(bash "$SCAN" "$_pf" 2>&1)"; _rc=$?
+  rm -f "$_pf"
+  if [ "$_rc" -ge 2 ] || printf '%s' "$_out" | grep -qi 'awk:\|not found\|syntax error'; then
+    echo "self-test FAIL [PREFLIGHT]: the secret detector CANNOT RUN on this machine (rc=$_rc)."
+    printf '%s\n' "$_out" | sed 's/^/       /'
+    echo "       This is a PLATFORM failure, not a fixture failure. awk dialect: $(awk --version 2>&1 | head -1)"
+    exit 1
+  fi
+  if [ "$_rc" != "1" ]; then
+    echo "self-test FAIL [PREFLIGHT]: the detector ran but did NOT flag an obvious planted secret (rc=$_rc)."
+    exit 1
+  fi
+  echo "self-test ok: PREFLIGHT — detector runs here and flags a planted secret"
+fi
+
 # Each fixture declares its expectation on the FIRST line: `# expect: <STEP> <FLAG|CLEAN>`
 for fx in "$CONF"/*/*.yaml; do
   [ -f "$fx" ] || continue
