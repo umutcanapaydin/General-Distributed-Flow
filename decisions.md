@@ -443,8 +443,11 @@ precisely, and that is now stated in the file.
 | **PREFLIGHT in `gdf-selftest.sh`** | *"can the detector run on this machine at all?"* is now its own loud first check. It plants an obvious secret, requires rc=1, and on failure prints the awk dialect and says **PLATFORM failure, not fixture failure** |
 
 **Verified across three awk dialects** (GNU 5.1, mawk, busybox), 8 checks each, plus: planted secret →
-rc=1; clean file → rc=0; awk made unavailable → **rc=2, fails closed**. BSD awk itself is confirmed by
-the owner re-running on the Mac — that is the only machine that can prove it.
+rc=1; clean file → rc=0; awk made unavailable → **rc=2, fails closed**.
+
+**BSD awk verified on the owner's Mac, 2026-08-05** — the harness went from `FAIL` to `PASS` with all
+8 checks green on the machine that produced the defect, including the deliberate-sabotage leg. That
+closes the only dialect no CI runner and no sandbox can reach.
 
 **Why the preflight matters more than the fix.** The symptom the owner saw was *"a fixture didn't
 fire"*, which points at the fixture. The cause was *"the tool cannot start here"*. Three minutes were
