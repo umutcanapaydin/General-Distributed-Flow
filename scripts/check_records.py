@@ -836,7 +836,7 @@ def governed_records(root: Path) -> list[Path]:
             # and matched NONE of the globs above, so the validator could not see the two documents
             # the whole hearing ran on. Widened, and kept explicit rather than a bare *.md glob so
             # the narrowness rule (V4C-35) still holds.
-            "council-telemetry.md", "friction-ledger.md", "CONTROL-SCREEN.md", "RESUME-HERE.md", "increment-*-packet.md"]
+            "council-telemetry.md", "friction-ledger.md", "CONTROL-SCREEN.md", "increment-*-packet.md"]
     # A repo may override the list with `.governed-records` (one glob per line, `#` comments).
     # Added at v4.2 so GDF — a DIFFERENT repo with a different record set — can run this exact
     # file rather than a forked near-copy. Narrow by rule (V4C-35): the manifest exists only
