@@ -735,6 +735,44 @@ LANG_SUFFIXES = {".md", ".py", ".sh", ".yml", ".yaml", ".json", ".html", ".txt",
 LANG_EXTENSIONLESS = {"Makefile", "Dockerfile", "CODEOWNERS", "LICENSE"}
 
 
+def telemetry_verdicts(root: Path) -> list[Finding]:
+    """T1 — every traceback carries a verdict (V4C-86).
+
+    `council-telemetry.md` §3.2 makes it a condition of REPORTED that every entry resolves to a record
+    id or `NONE-PROPOSED`. Thirty-six did not, and the register had drifted from a nine-column table to
+    prose sections without anything noticing -- richer to read, structurally invisible. Four ids were
+    cited by an instrument and had no entry at all; two KEEP verdicts rested on them.
+
+    **The instrument built to hold the council accountable could not hold itself to its own bright
+    line, for three cuts.** Found by a seat counting, not by any check.
+
+    A traceback id counts as covered if it appears in a table row -- the original nine-column format or
+    the §15 verdict index -- with a non-empty verdict cell.
+    """
+    f: list[Finding] = []
+    tel = root / "council-telemetry.md"
+    if not tel.is_file():
+        return f
+    body = tel.read_text(encoding="utf-8", errors="replace")
+    covered: set[str] = set()
+    for line in body.splitlines():
+        if not line.lstrip().startswith("|"):
+            continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        m = re.match(r"\*?\*?(TB-\d+)", cells[0]) if cells else None
+        if m and len(cells) >= 3 and any(c and set(c) - set("-* ") for c in cells[2:]):
+            covered.add(m.group(1))
+    seen = set(re.findall(r"TB-\d+", body))
+    for tid in sorted(seen - covered, key=lambda x: int(x[3:])):
+        f.append(Finding(Path("council-telemetry.md"), 1, "T1",
+                         f"`{tid}` has no table row carrying a verdict. Section 3.2 makes that a "
+                         "condition of REPORTED: a verdict resolves to a record id or `NONE-PROPOSED`. "
+                         "**An entry with no disposition is an open loop wearing a finding's clothes** "
+                         "-- and four such ids were cited as evidence by a control screen while having "
+                         "no entry at all"))
+    return f
+
+
 def language_rule(root: Path) -> list[Finding]:
     """L1 — no Turkish-specific letter in a tracked file, outside the reasoned allowlist."""
     allow: list = []
@@ -798,7 +836,7 @@ def governed_records(root: Path) -> list[Path]:
             # and matched NONE of the globs above, so the validator could not see the two documents
             # the whole hearing ran on. Widened, and kept explicit rather than a bare *.md glob so
             # the narrowness rule (V4C-35) still holds.
-            "council-telemetry.md", "friction-ledger.md", "CONTROL-SCREEN.md", "increment-*-packet.md"]
+            "council-telemetry.md", "friction-ledger.md", "CONTROL-SCREEN.md", "RESUME-HERE.md", "increment-*-packet.md"]
     # A repo may override the list with `.governed-records` (one glob per line, `#` comments).
     # Added at v4.2 so GDF — a DIFFERENT repo with a different record set — can run this exact
     # file rather than a forked near-copy. Narrow by rule (V4C-35): the manifest exists only
@@ -1010,6 +1048,7 @@ def main() -> int:
     findings += manifest_rules(root, install=Path(a.install).resolve() if a.install else None)
     findings += warning_ledger(root)                                  # C2
     findings += language_rule(root)                                   # L1
+    findings += telemetry_verdicts(root)                              # T1
     print(f"(scanned {len(records)} record(s) with frontmatter)")
     return report(findings, "repo")
 
