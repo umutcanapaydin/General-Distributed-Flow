@@ -804,8 +804,26 @@ def language_rule(root: Path) -> list[Finding]:
             text = p.read_text(encoding="utf-8", errors="replace")
         except Exception:
             continue
+        # v5.1 (GPF-005). L1 had no way to be DESCRIBED inside the repository it governs: a record
+        # explaining "L1 flags letters such as \u011f, \u0131, \u015f" was itself an L1 violation, and so was
+        # the ADR correcting that finding -- two false positives in one field session. The council's
+        # condition forbids a negation word list (measured bypass surface, see test-git-authority's
+        # history); the escape is STRUCTURAL instead: in markdown, quoted material -- fenced code
+        # blocks and inline backtick spans -- is mention, not use. Turkish PROSE anywhere, including
+        # inside records, is still a finding. This file's own TR_CHARS constant is written as \u
+        # escapes for exactly this reason; documents cannot do that, so they quote.
+        in_fence = False
         for i, line in enumerate(text.splitlines(), 1):
-            if TR_CHARS.search(line):
+            if rel.endswith(".md"):
+                if line.lstrip().startswith("```"):
+                    in_fence = not in_fence
+                    continue
+                if in_fence:
+                    continue
+                probe = re.sub(r"`[^`]*`", "", line)         # inline code spans are quotation
+            else:
+                probe = line
+            if TR_CHARS.search(probe):
                 f.append(Finding(Path(rel), i, "L1",
                                  "Turkish text in an English-only repository (V4C-79). Translate it; "
                                  "if it is an owner quote, translate and mark it "
@@ -836,7 +854,7 @@ def governed_records(root: Path) -> list[Path]:
             # and matched NONE of the globs above, so the validator could not see the two documents
             # the whole hearing ran on. Widened, and kept explicit rather than a bare *.md glob so
             # the narrowness rule (V4C-35) still holds.
-            "council-telemetry.md", "friction-ledger.md", "CONTROL-SCREEN.md", "increment-*-packet.md"]
+            "council-telemetry.md", "friction-ledger.md", "CONTROL-SCREEN.md", "EXPERIENCE-HARVEST-PROMPT.md", "increment-*-packet.md"]
     # A repo may override the list with `.governed-records` (one glob per line, `#` comments).
     # Added at v4.2 so GDF — a DIFFERENT repo with a different record set — can run this exact
     # file rather than a forked near-copy. Narrow by rule (V4C-35): the manifest exists only
